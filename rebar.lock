@@ -1,0 +1,18 @@
+{"1.1.0",
+[{<<"backoff">>,{pkg,<<"backoff">>,<<"1.1.6">>},1},
+ {<<"gleam_otp_process">>,
+  {git,"https://github.com/gleam-experiments/otp_process",
+       {ref,"02f8ba0b5b3c3c39096ad7117f9a486e6c5281eb"}},
+  0},
+ {<<"gleam_stdlib">>,{pkg,<<"gleam_stdlib">>,<<"0.8.0">>},0},
+ {<<"pg_types">>,{pkg,<<"pg_types">>,<<"0.2.0">>},1},
+ {<<"pgo">>,{pkg,<<"pgo">>,<<"0.11.0">>},0},
+ {<<"telemetry">>,{pkg,<<"telemetry">>,<<"0.4.1">>},1}]}.
+[
+{pkg_hash,[
+ {<<"backoff">>, <<"83B72ED2108BA1EE8F7D1C22E0B4A00CFE3593A67DBC792799E8CCE9F42F796B">>},
+ {<<"gleam_stdlib">>, <<"A2DA46A7F2A971DBD973B04596182C71EC03D7A2991B75DCE995D7D154018FA5">>},
+ {<<"pg_types">>, <<"B73A0409CB94183226547EDF10793F6B3AD00E098B8D70354EF3886C0F95F2F6">>},
+ {<<"pgo">>, <<"66D5608192BF36511F72696DCBB73A8C8D44210E17DDACD15C18F9511E49549B">>},
+ {<<"telemetry">>, <<"AE2718484892448A24470E6AA341BC847C3277BFB8D4E9289F7474D752C09C7F">>}]}
+].
