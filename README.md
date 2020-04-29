@@ -1,11 +1,6 @@
-# gleam_experimental_pgo
+# gleam_pgo
 
-[![](https://github.com/gleam-experiments/pgo/workflows/test/badge.svg)](https://github.com/gleam-experiments/pgo/actions)
-
-
-Experimental bindings to the Erlang [pgo][pgo] Postgresql database client.
-
-[pgo]: https://github.com/erleans/pgo
+A Gleam program
 
 
 ## Quick start
@@ -19,4 +14,16 @@ rebar3 eunit
 
 # Run the Erlang REPL
 rebar3 shell
+```
+
+
+## Installation
+
+If [available in Hex](https://www.rebar3.org/docs/dependencies#section-declaring-dependencies)
+this package can be installed by adding `gleam_pgo` to your `rebar.config` dependencies:
+
+```erlang
+{deps, [
+    gleam_pgo
+]}.
 ```
