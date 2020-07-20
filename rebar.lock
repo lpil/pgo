@@ -1,0 +1,14 @@
+{"1.1.0",
+[{<<"backoff">>,{pkg,<<"backoff">>,<<"1.1.6">>},1},
+ {<<"gleam_stdlib">>,{pkg,<<"gleam_stdlib">>,<<"0.10.1">>},0},
+ {<<"pg_types">>,{pkg,<<"pg_types">>,<<"0.3.0">>},1},
+ {<<"pgo">>,{pkg,<<"pgo">>,<<"0.11.1">>},0},
+ {<<"telemetry">>,{pkg,<<"telemetry">>,<<"0.4.2">>},1}]}.
+[
+{pkg_hash,[
+ {<<"backoff">>, <<"83B72ED2108BA1EE8F7D1C22E0B4A00CFE3593A67DBC792799E8CCE9F42F796B">>},
+ {<<"gleam_stdlib">>, <<"F123F33E03B5CDF5E19FC179B9EE81269DEB93F7DEFADB17EF2930E4DB9011E7">>},
+ {<<"pg_types">>, <<"1CE19C32851E2E59A3DE17A88920FFE0566041FCE81BE5F4537F1DB01D4267AA">>},
+ {<<"pgo">>, <<"4B699096E0C5009610AB063F68B97D1B45FD4BAFA286ED5FFC6744DA07F7B6A6">>},
+ {<<"telemetry">>, <<"2808C992455E08D6177322F14D3BDB6B625FBCFD233A73505870D8738A2F4599">>}]}
+].

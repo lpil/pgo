@@ -1,0 +1,28 @@
+version: "3"
+
+volumes:
+  _build:
+  deps:
+  gen:
+services:
+  pgo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /opt/app
+    volumes:
+      - .:/opt/app
+      - _build:/opt/app/_build
+      - deps:/opt/app/deps
+      # FIXME Gleam issue, don't delete gen directory.
+      # - gen:/opt/app/gen
+    network_mode: host
+    depends_on:
+      - db
+
+  db:
+    image: "postgres:11.2"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pgo
