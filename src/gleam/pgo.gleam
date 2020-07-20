@@ -201,9 +201,7 @@ pub fn query(
           assert Ok(given) = dynamic.int(given)
           Error(WrongNumberOfArguments(expected, given))
         }
-        Error(_) -> {
-            Error(Other(reason))
-        }
+        Error(_) -> Error(Other(reason))
       }
     }
     Error(_) -> Ok(map_response(query_result))
