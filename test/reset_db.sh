@@ -15,7 +15,7 @@ SQL
 psql -v "ON_ERROR_STOP=1" -h localhost -U postgres -d gleam_pgo_test <<SQL
 DROP TABLE IF EXISTS cats;
 CREATE TABLE cats (
-  id INTEGER PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
   is_cute boolean NOT NULL DEFAULT true
 );
