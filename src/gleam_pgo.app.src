@@ -4,7 +4,9 @@
   {registered, []},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    pg_types,
+    pgo
    ]},
   {env,[]},
   {modules, []},

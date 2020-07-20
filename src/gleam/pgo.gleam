@@ -54,6 +54,7 @@ pub fn url_config(database_url: String) -> Result(List(PoolConfig), Nil) {
 }
 
 // Ideally unnamed
+// TODO a dynamic.pid function
 pub external fn start_link(Atom, List(PoolConfig)) -> Result(Pid, Dynamic) =
   "pgo_pool" "start_link"
 
@@ -98,7 +99,14 @@ pub fn bytea(value: BitString) -> PgType {
 external fn erl_query(String, List(PgType), Map(Atom, Atom)) -> Dynamic =
   "pgo" "query"
 
-pub fn query(pool: Atom, sql: String, arguments: List(PgType)) -> Result(Dynamic, Dynamic) {
-  let query_options = map.from_list([tuple(atom.create_from_string("pool"), pool)])
-  todo
+pub fn query(
+  pool: Atom,
+  sql: String,
+  arguments: List(PgType),
+) -> Result(Dynamic, Dynamic) {
+  let query_options = map.from_list(
+    [tuple(atom.create_from_string("pool"), pool)],
+  )
+  erl_query(sql, arguments, query_options)
+  |> Ok
 }
