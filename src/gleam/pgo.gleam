@@ -71,7 +71,7 @@ pub external fn start_link(Atom, List(PoolConfig)) -> Result(Pid, Dynamic) =
 pub external type PgType
 
 pub fn null() -> PgType {
-  atom.create_from_string("nil")
+  atom.create_from_string("null")
   |> dynamic.from()
   |> dynamic.unsafe_coerce()
 }
