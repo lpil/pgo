@@ -7,17 +7,27 @@ import gleam/string
 import gleam/should
 
 pub fn url_config_test() {
-    pgo.url_config("postgres://u:p@db.test:1234/my_db")
-    |> should.equal(Ok([pgo.Host("db.test"), pgo.Port(1234), pgo.Database("my_db"), pgo.User("u"), pgo.Password("p")]))
+  pgo.url_config("postgres://u:p@db.test:1234/my_db")
+  |> should.equal(
+    Ok(
+      [
+        pgo.Host("db.test"),
+        pgo.Port(1234),
+        pgo.Database("my_db"),
+        pgo.User("u"),
+        pgo.Password("p"),
+      ],
+    ),
+  )
 
-    pgo.url_config("foo://u:p@db.test:1234/my_db")
-    |> should.equal(Error(Nil))
+  pgo.url_config("foo://u:p@db.test:1234/my_db")
+  |> should.equal(Error(Nil))
 
-    pgo.url_config("postgres://u@db.test:1234/my_db")
-    |> should.equal(Error(Nil))
+  pgo.url_config("postgres://u@db.test:1234/my_db")
+  |> should.equal(Error(Nil))
 
-    pgo.url_config("postgres://u:p@db.test:1234/my_db/foo")
-    |> should.equal(Error(Nil))
+  pgo.url_config("postgres://u:p@db.test:1234/my_db/foo")
+  |> should.equal(Error(Nil))
 }
 
 external fn ensure_all_started(Atom) -> Result(List(Atom), Dynamic) =

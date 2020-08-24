@@ -7,7 +7,7 @@ import gleam/dynamic.{Dynamic}
 import gleam/string
 import gleam/io
 import gleam/map.{Map}
-import gleam/option.{Option, Some, None}
+import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
 import gleam/otp/process.{Pid}
 
