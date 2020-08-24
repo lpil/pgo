@@ -57,8 +57,11 @@ pub fn url_config(database_url: String) -> Result(List(PoolConfig), Nil) {
             Password(password),
           ],
         )
+        _ -> Error(Nil)
       }
+      _ -> Error(Nil)
     }
+    _ -> Error(Nil)
   }
 }
 
