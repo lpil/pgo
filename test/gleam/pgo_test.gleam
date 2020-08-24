@@ -8,17 +8,13 @@ import gleam/should
 
 pub fn url_config_test() {
   pgo.url_config("postgres://u:p@db.test:1234/my_db")
-  |> should.equal(
-    Ok(
-      [
-        pgo.Host("db.test"),
-        pgo.Port(1234),
-        pgo.Database("my_db"),
-        pgo.User("u"),
-        pgo.Password("p"),
-      ],
-    ),
-  )
+  |> should.equal(Ok([
+    pgo.Host("db.test"),
+    pgo.Port(1234),
+    pgo.Database("my_db"),
+    pgo.User("u"),
+    pgo.Password("p"),
+  ]))
 
   pgo.url_config("foo://u:p@db.test:1234/my_db")
   |> should.equal(Error(Nil))
@@ -43,14 +39,15 @@ fn start_default() {
 }
 
 pub fn inserting_new_rows_test() {
-  let Ok(conn) = start_default()
-  let sql = "
+  assert Ok(conn) = start_default()
+  let sql =
+    "
   INSERT INTO
     cats
   VALUES
     (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)"
 
-  let Ok(response) = pgo.query(conn, sql, [])
+  assert Ok(response) = pgo.query(conn, sql, [])
 
   response.0
   |> should.equal(pgo.Insert)
@@ -61,8 +58,9 @@ pub fn inserting_new_rows_test() {
 }
 
 pub fn inserting_new_rows_and_returning_test() {
-  let Ok(conn) = start_default()
-  let sql = "
+  assert Ok(conn) = start_default()
+  let sql =
+    "
   INSERT INTO
     cats
   VALUES
@@ -70,7 +68,7 @@ pub fn inserting_new_rows_and_returning_test() {
   RETURNING
     name"
 
-  let Ok(response) = pgo.query(conn, sql, [])
+  assert Ok(response) = pgo.query(conn, sql, [])
 
   response.0
   |> should.equal(pgo.Insert)
@@ -81,8 +79,9 @@ pub fn inserting_new_rows_and_returning_test() {
 }
 
 pub fn selecting_rows_test() {
-  let Ok(conn) = start_default()
-  let sql = "
+  assert Ok(conn) = start_default()
+  let sql =
+    "
     INSERT INTO
       cats
     VALUES
@@ -90,12 +89,12 @@ pub fn selecting_rows_test() {
     RETURNING
       id"
 
-  let Ok(tuple(_, _, [row])) = pgo.query(conn, sql, [])
-  let Ok(id) = dynamic.element(row, 0)
-  let Ok(id) = dynamic.int(id)
+  assert Ok(tuple(_, _, [row])) = pgo.query(conn, sql, [])
+  assert Ok(id) = dynamic.element(row, 0)
+  assert Ok(id) = dynamic.int(id)
   let sql = string.append("SELECT * FROM cats WHERE id = ", int.to_string(id))
 
-  let Ok(response) = pgo.query(conn, sql, [])
+  assert Ok(response) = pgo.query(conn, sql, [])
 
   response.0
   |> should.equal(pgo.Select)
@@ -111,24 +110,24 @@ pub fn selecting_rows_test() {
 }
 
 pub fn invalid_sql_test() {
-  let Ok(conn) = start_default()
+  assert Ok(conn) = start_default()
   let sql = "S"
-  let Error(pgo.PgsqlError(message)) = pgo.query(conn, sql, [])
+  assert Error(pgo.PgsqlError(message)) = pgo.query(conn, sql, [])
   message
   |> should.equal("syntax error at or near \"S\"")
 }
 
 pub fn insert_constraint_error_test() {
-  let Ok(conn) = start_default()
-  let sql = "
+  assert Ok(conn) = start_default()
+  let sql =
+    "
     INSERT INTO
       cats
     VALUES
       (900, 'bill', true), (900, 'felix', false)"
 
-  let Error(
-    pgo.ConstrainError(message, constraint, detail),
-  ) = pgo.query(conn, sql, [])
+  assert Error(pgo.ConstrainError(message, constraint, detail)) =
+    pgo.query(conn, sql, [])
   message
   |> should.equal(
     "duplicate key value violates unique constraint \"cats_pkey\"",
@@ -136,23 +135,24 @@ pub fn insert_constraint_error_test() {
 }
 
 pub fn select_from_unknown_table_test() {
-  let Ok(conn) = start_default()
+  assert Ok(conn) = start_default()
   let sql = "SELECT * FROM unknown"
 
-  let Error(pgo.PgsqlError(message)) = pgo.query(conn, sql, [])
+  assert Error(pgo.PgsqlError(message)) = pgo.query(conn, sql, [])
   message
   |> should.equal("relation \"unknown\" does not exist")
 }
 
 pub fn insert_with_incorrect_type_test() {
-  let Ok(conn) = start_default()
-  let sql = "
+  assert Ok(conn) = start_default()
+  let sql =
+    "
       INSERT INTO
         cats
       VALUES
         (true, true, true)"
 
-  let Error(pgo.PgsqlError(message)) = pgo.query(conn, sql, [])
+  assert Error(pgo.PgsqlError(message)) = pgo.query(conn, sql, [])
   message
   |> should.equal(
     "column \"id\" is of type integer but expression is of type boolean",
@@ -160,7 +160,7 @@ pub fn insert_with_incorrect_type_test() {
 }
 
 pub fn select_with_incorrect_type_test() {
-  let Ok(conn) = start_default()
+  assert Ok(conn) = start_default()
   let sql = "SELECT * FROM cats WHERE id = $1"
 
   assert Error(pgo.Other(_)) = pgo.query(conn, sql, [pgo.text("True")])
@@ -168,7 +168,7 @@ pub fn select_with_incorrect_type_test() {
 }
 
 pub fn query_with_wrong_number_of_arguments_test() {
-  let Ok(conn) = start_default()
+  assert Ok(conn) = start_default()
   let sql = "SELECT * FROM cats WHERE id = $1"
 
   pgo.query(conn, sql, [])
