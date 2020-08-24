@@ -11,5 +11,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Run mix test
+      - name: Run tests
         run: docker-compose run pgo rebar3 eunit

@@ -28,36 +28,35 @@ pub type PoolConfig {
   Trace(Bool)
 }
 
+fn parse_database_url(
+  database_url: String,
+) -> Result(tuple(String, String, String, Int), Nil) {
+  case uri.parse(database_url) {
+    Ok(Uri(
+      scheme: Some("postgres"),
+      userinfo: Some(userinfo),
+      host: Some(host),
+      port: Some(db_port),
+      path: path,
+      ..,
+    )) -> Ok(tuple(userinfo, host, path, db_port))
+    _ -> Error(Nil)
+  }
+}
+
 /// Parse a database url into an option list that can be used to start a pool.
 pub fn url_config(database_url: String) -> Result(List(PoolConfig), Nil) {
-  case uri.parse(database_url) {
-    Ok(
-      Uri(
-        scheme: Some("postgres"),
-        userinfo: Some(userinfo),
-        host: Some(host),
-        port: Some(db_port),
-        path: path,
-        ..,
-      ),
-    ) -> case string.split_once(userinfo, ":") {
-      Ok(tuple(user, password)) -> case string.split(path, "/") {
-        [
-          "",
-          database,
-        ] -> Ok(
-          [
-            Host(host),
-            Port(db_port),
-            Database(database),
-            User(user),
-            Password(password),
-          ],
-        )
-        _ -> Error(Nil)
-      }
-      _ -> Error(Nil)
-    }
+  try tuple(userinfo, host, path, db_port) = parse_database_url(database_url)
+  try tuple(user, password) = string.split_once(userinfo, ":")
+  case string.split(path, "/") {
+    ["", database] ->
+      Ok([
+        Host(host),
+        Port(db_port),
+        Database(database),
+        User(user),
+        Password(password),
+      ])
     _ -> Error(Nil)
   }
 }
@@ -168,21 +167,18 @@ pub fn query(
   sql: String,
   arguments: List(PgType),
 ) -> Result(tuple(QueryCommand, Int, List(Dynamic)), QueryError) {
-  let query_options = map.from_list(
-    [tuple(atom.create_from_string("pool"), pool)],
-  )
+  let query_options =
+    map.from_list([tuple(atom.create_from_string("pool"), pool)])
   let query_result = erl_query(sql, arguments, query_options)
 
   let error_atom = dynamic.from(atom.create_from_string("error"))
   case dynamic.element(query_result, 0) {
     Ok(tag) if tag == error_atom -> {
       assert Ok(reason) = dynamic.element(query_result, 1)
-      let pgsql_error_atom = dynamic.from(
-        atom.create_from_string("pgsql_error"),
-      )
-      let pgo_protocol_atom = dynamic.from(
-        atom.create_from_string("pgo_protocol"),
-      )
+      let pgsql_error_atom =
+        dynamic.from(atom.create_from_string("pgsql_error"))
+      let pgo_protocol_atom =
+        dynamic.from(atom.create_from_string("pgo_protocol"))
       case dynamic.element(reason, 0) {
         Ok(tag) if tag == pgsql_error_atom -> {
           assert Ok(details) = dynamic.element(reason, 1)
