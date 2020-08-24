@@ -21,7 +21,8 @@ services:
       - db
 
   db:
-    image: "postgres:11.2"
+    network_mode: host
+    image: "postgres:12.4"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
