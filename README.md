@@ -1,26 +1,39 @@
-# gleam_pgo
+# Gleam PGO
 
-A Gleam program
+A Postgresql database client for Gleam, based on [PGO][erlang-pgo].
 
+[erlang-pgo]: https://github.com/erleans/pgo
 
-## Quick start
+```rust
+import gleam/pgo
 
-```sh
-# Build the project
-rebar3 compile
+pub fn main() {
+  let default = atom.create_from_string("default")
+  let config = [pgo.Host("localhost"), pgo.Database("gleam_pgo_test")]
+  let _ = pgo.start_link(default, config)
 
-# Run the eunit tests
-rebar3 eunit
+  let sql = "
+  INSERT INTO
+    cats
+  VALUES
+    (DEFAULT, 'bill', true),
+    (DEFAULT, 'felix', false)"
 
-# Run the Erlang REPL
-rebar3 shell
+  assert Ok(response) = pgo.query(default, sql, [])
+
+  response.0
+  |> should.equal(pgo.Insert)
+  response.1
+  |> should.equal(2)
+  response.2
+  |> should.equal([])
+}
 ```
 
 
 ## Installation
 
-If [available in Hex](https://www.rebar3.org/docs/dependencies#section-declaring-dependencies)
-this package can be installed by adding `gleam_pgo` to your `rebar.config` dependencies:
+This package can be installed by adding `gleam_pgo` to your `rebar.config` dependencies:
 
 ```erlang
 {deps, [
