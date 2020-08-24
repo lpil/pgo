@@ -1,5 +1,6 @@
 {"1.1.0",
 [{<<"backoff">>,{pkg,<<"backoff">>,<<"1.1.6">>},1},
+ {<<"gleam_otp">>,{pkg,<<"gleam_otp">>,<<"0.0.1">>},0},
  {<<"gleam_stdlib">>,{pkg,<<"gleam_stdlib">>,<<"0.10.1">>},0},
  {<<"pg_types">>,{pkg,<<"pg_types">>,<<"0.3.0">>},1},
  {<<"pgo">>,{pkg,<<"pgo">>,<<"0.11.1">>},0},
@@ -7,6 +8,7 @@
 [
 {pkg_hash,[
  {<<"backoff">>, <<"83B72ED2108BA1EE8F7D1C22E0B4A00CFE3593A67DBC792799E8CCE9F42F796B">>},
+ {<<"gleam_otp">>, <<"2E43C9F807DDD281D1142F5D1428627F1D99A1E53C4C95D6CCB5B4A6C7799ABA">>},
  {<<"gleam_stdlib">>, <<"F123F33E03B5CDF5E19FC179B9EE81269DEB93F7DEFADB17EF2930E4DB9011E7">>},
  {<<"pg_types">>, <<"1CE19C32851E2E59A3DE17A88920FFE0566041FCE81BE5F4537F1DB01D4267AA">>},
  {<<"pgo">>, <<"4B699096E0C5009610AB063F68B97D1B45FD4BAFA286ED5FFC6744DA07F7B6A6">>},
