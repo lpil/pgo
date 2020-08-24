@@ -1,6 +1,6 @@
 {application, gleam_pgo,
  [{description, "A Gleam program"},
-  {vsn, "1.0.0"},
+  {vsn, "0.1.0"},
   {registered, []},
   {applications,
    [kernel,
@@ -12,5 +12,5 @@
   {modules, []},
 
   {licenses, ["Apache 2.0"]},
-  {links, []}
+  {links, [{"GitHub", "https://github.com/gleam-experiments/pgo"}]}
 ]}.
