@@ -7,7 +7,7 @@ import gleam/dynamic.{Dynamic}
 import gleam/string
 import gleam/io
 import gleam/map.{Map}
-import gleam/option.{Some}
+import gleam/option.{Option, Some, None}
 import gleam/uri.{Uri}
 
 /// Type representing the PID for a pool process
@@ -104,6 +104,13 @@ pub fn bytea(value: BitString) -> PgType {
   value
   |> dynamic.from()
   |> dynamic.unsafe_coerce()
+}
+
+pub fn nullable(value: Option(a), mapper: fn(a) -> PgType) {
+  case value {
+    Some(term) -> mapper(term)
+    None -> null()
+  }
 }
 
 external fn erl_query(String, List(PgType), Map(Atom, Atom)) -> Dynamic =
