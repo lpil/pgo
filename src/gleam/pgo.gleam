@@ -9,10 +9,7 @@ import gleam/io
 import gleam/map.{Map}
 import gleam/option.{Option, Some, None}
 import gleam/uri.{Uri}
-
-/// Type representing the PID for a pool process
-/// NOTE this type should be switched to a general PID type when one is available
-pub external type Pid
+import gleam/otp/process.{Pid}
 
 /// Avaliable configuration options when starting a pool.
 pub type PoolConfig {
@@ -66,7 +63,6 @@ pub fn url_config(database_url: String) -> Result(List(PoolConfig), Nil) {
 }
 
 // Ideally unnamed
-// TODO a dynamic.pid function
 pub external fn start_link(Atom, List(PoolConfig)) -> Result(Pid, Dynamic) =
   "pgo_pool" "start_link"
 
