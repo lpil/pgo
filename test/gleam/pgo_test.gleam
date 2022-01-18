@@ -32,7 +32,6 @@ external fn ensure_all_started(Atom) -> Result(List(Atom), Dynamic) =
 fn start_default() {
   assert Ok(_) = ensure_all_started(atom.create_from_string("pgo"))
   let default_atom = atom.create_from_string("default")
-
   let config = [pgo.Host("localhost"), pgo.Database("gleam_pgo_test")]
   let _ = pgo.start_link(atom.create_from_string("default"), config)
   Ok(default_atom)
@@ -46,9 +45,7 @@ pub fn inserting_new_rows_test() {
     cats
   VALUES
     (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)"
-
   assert Ok(response) = pgo.query(conn, sql, [])
-
   response.0
   |> should.equal(pgo.Insert)
   response.1
@@ -67,9 +64,7 @@ pub fn inserting_new_rows_and_returning_test() {
     (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)
   RETURNING
     name"
-
   assert Ok(response) = pgo.query(conn, sql, [])
-
   response.0
   |> should.equal(pgo.Insert)
   response.1
@@ -88,21 +83,17 @@ pub fn selecting_rows_test() {
       (DEFAULT, 'neo', true)
     RETURNING
       id"
-
   assert Ok(#(_, _, [row])) = pgo.query(conn, sql, [])
   assert Ok(id) = dynamic.element(row, 0)
   assert Ok(id) = dynamic.int(id)
   let sql = string.append("SELECT * FROM cats WHERE id = ", int.to_string(id))
-
   assert Ok(response) = pgo.query(conn, sql, [])
-
   response.0
   |> should.equal(pgo.Select)
   response.1
   |> should.equal(1)
   response.2
   |> should.equal([dynamic.from(#(id, "neo", True))])
-
   let sql = "SELECT * FROM cats WHERE id = $1"
   // Test same response when using interpolation
   pgo.query(conn, sql, [pgo.int(id)])
@@ -111,10 +102,10 @@ pub fn selecting_rows_test() {
 
 pub fn invalid_sql_test() {
   assert Ok(conn) = start_default()
-  let sql = "S"
+  let sql = "select       select"
   assert Error(pgo.PgsqlError(message)) = pgo.query(conn, sql, [])
   message
-  |> should.equal("syntax error at or near \"S\"")
+  |> should.equal("syntax error at or near \"select\"")
 }
 
 pub fn insert_constraint_error_test() {
@@ -128,6 +119,13 @@ pub fn insert_constraint_error_test() {
 
   assert Error(pgo.ConstrainError(message, constraint, detail)) =
     pgo.query(conn, sql, [])
+
+  constraint
+  |> should.equal("cats_pkey")
+
+  detail
+  |> should.equal("Key (id)=(900) already exists.")
+
   message
   |> should.equal(
     "duplicate key value violates unique constraint \"cats_pkey\"",
@@ -137,7 +135,6 @@ pub fn insert_constraint_error_test() {
 pub fn select_from_unknown_table_test() {
   assert Ok(conn) = start_default()
   let sql = "SELECT * FROM unknown"
-
   assert Error(pgo.PgsqlError(message)) = pgo.query(conn, sql, [])
   message
   |> should.equal("relation \"unknown\" does not exist")
@@ -151,7 +148,6 @@ pub fn insert_with_incorrect_type_test() {
         cats
       VALUES
         (true, true, true)"
-
   assert Error(pgo.PgsqlError(message)) = pgo.query(conn, sql, [])
   message
   |> should.equal(
@@ -162,7 +158,6 @@ pub fn insert_with_incorrect_type_test() {
 pub fn select_with_incorrect_type_test() {
   assert Ok(conn) = start_default()
   let sql = "SELECT * FROM cats WHERE id = $1"
-
   assert Error(pgo.Other(_)) = pgo.query(conn, sql, [pgo.text("True")])
   Nil
 }
@@ -170,7 +165,6 @@ pub fn select_with_incorrect_type_test() {
 pub fn query_with_wrong_number_of_arguments_test() {
   assert Ok(conn) = start_default()
   let sql = "SELECT * FROM cats WHERE id = $1"
-
   pgo.query(conn, sql, [])
   |> should.equal(Error(pgo.WrongNumberOfArguments(1, 0)))
 }
