@@ -1,4 +1,4 @@
-import gleam/atom.{Atom}
+import gleam/erlang/atom.{Atom}
 import gleam/dynamic.{Dynamic}
 import gleam/int
 import gleam/io
@@ -75,7 +75,7 @@ pub fn inserting_new_rows_and_returning_test() {
   response.1
   |> should.equal(2)
   response.2
-  |> should.equal([dynamic.from(tuple("bill")), dynamic.from(tuple("felix"))])
+  |> should.equal([dynamic.from(#("bill")), dynamic.from(#("felix"))])
 }
 
 pub fn selecting_rows_test() {
@@ -89,7 +89,7 @@ pub fn selecting_rows_test() {
     RETURNING
       id"
 
-  assert Ok(tuple(_, _, [row])) = pgo.query(conn, sql, [])
+  assert Ok(#(_, _, [row])) = pgo.query(conn, sql, [])
   assert Ok(id) = dynamic.element(row, 0)
   assert Ok(id) = dynamic.int(id)
   let sql = string.append("SELECT * FROM cats WHERE id = ", int.to_string(id))
@@ -101,7 +101,7 @@ pub fn selecting_rows_test() {
   response.1
   |> should.equal(1)
   response.2
-  |> should.equal([dynamic.from(tuple(id, "neo", True))])
+  |> should.equal([dynamic.from(#(id, "neo", True))])
 
   let sql = "SELECT * FROM cats WHERE id = $1"
   // Test same response when using interpolation

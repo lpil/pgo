@@ -2,7 +2,7 @@
 ////
 //// Gleam wrapper around pgo library
 
-import gleam/atom.{Atom}
+import gleam/erlang/atom.{Atom}
 import gleam/dynamic.{Dynamic}
 import gleam/string
 import gleam/io
@@ -30,24 +30,24 @@ pub type PoolConfig {
 
 fn parse_database_url(
   database_url: String,
-) -> Result(tuple(String, String, String, Int), Nil) {
+) -> Result(#(String, String, String, Int), Nil) {
   case uri.parse(database_url) {
-    Ok(Uri(
+    Uri(
       scheme: Some("postgres"),
       userinfo: Some(userinfo),
       host: Some(host),
       port: Some(db_port),
       path: path,
       ..,
-    )) -> Ok(tuple(userinfo, host, path, db_port))
+    ) -> Ok(#(userinfo, host, path, db_port))
     _ -> Error(Nil)
   }
 }
 
 /// Parse a database url into an option list that can be used to start a pool.
 pub fn url_config(database_url: String) -> Result(List(PoolConfig), Nil) {
-  try tuple(userinfo, host, path, db_port) = parse_database_url(database_url)
-  try tuple(user, password) = string.split_once(userinfo, ":")
+  try #(userinfo, host, path, db_port) = parse_database_url(database_url)
+  try #(user, password) = string.split_once(userinfo, ":")
   case string.split(path, "/") {
     ["", database] ->
       Ok([
@@ -133,42 +133,16 @@ fn atom_field(data: Dynamic, key: String) {
   dynamic.field(data, atom.create_from_string(key))
 }
 
-fn command_from_atom(command: Atom) -> Result(QueryCommand, Atom) {
-  let insert_atom = atom.create_from_string("insert")
-  let update_atom = atom.create_from_string("update")
-  let select_atom = atom.create_from_string("select")
-  let delete_atom = atom.create_from_string("delete")
-  case command {
-    command if command == insert_atom -> Ok(Insert)
-    command if command == update_atom -> Ok(Update)
-    command if command == select_atom -> Ok(Select)
-    command if command == delete_atom -> Ok(Delete)
-    other -> Error(other)
-  }
-}
-
-fn map_response(query_result) {
-  assert Ok(command) = atom_field(query_result, "command")
-  assert Ok(command) = dynamic.atom(command)
-  assert Ok(command) = command_from_atom(command)
-
-  assert Ok(rows) = atom_field(query_result, "rows")
-  assert Ok(rows) = dynamic.list(rows)
-
-  assert Ok(num_rows) = atom_field(query_result, "num_rows")
-  assert Ok(num_rows) = dynamic.int(num_rows)
-
-  tuple(command, num_rows, rows)
-}
+external fn map_response(Dynamic) -> #(QueryCommand, Int, List(Dynamic)) =
+  "gleam_pgo_ffi" "map_response"
 
 /// Run a SQL query with the given arguments
 pub fn query(
   pool: Atom,
   sql: String,
   arguments: List(PgType),
-) -> Result(tuple(QueryCommand, Int, List(Dynamic)), QueryError) {
-  let query_options =
-    map.from_list([tuple(atom.create_from_string("pool"), pool)])
+) -> Result(#(QueryCommand, Int, List(Dynamic)), QueryError) {
+  let query_options = map.from_list([#(atom.create_from_string("pool"), pool)])
   let query_result = erl_query(sql, arguments, query_options)
 
   let error_atom = dynamic.from(atom.create_from_string("error"))
