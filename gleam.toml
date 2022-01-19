@@ -10,7 +10,7 @@ links = [
 ]
 
 [dependencies]
-gleam_stdlib = "0.19.0"
+gleam_stdlib = "~> 0.19"
 gleam_erlang = "~> 0.8"
 pgo = "~> 0.11"
 
