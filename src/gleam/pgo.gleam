@@ -2,14 +2,21 @@
 ////
 //// Gleam wrapper around pgo library
 
-import gleam/erlang/atom.{Atom}
+// TODO: pool shutdown function
+// TODO: config is a record
+// TODO: remove dynamic usage for arguments
+// TODO: refine errors
+// TODO: use a decode for returned rows?
+// TODO: return a record from query
+// TODO: transactions
+// TODO: json support
+import gleam/erlang/atom
 import gleam/dynamic.{Dynamic}
 import gleam/string
 import gleam/io
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
 
-// TODO: use a record
 /// Avaliable configuration options when starting a pool.
 pub type PoolConfig {
   Host(String)
@@ -60,9 +67,10 @@ pub fn url_config(database_url: String) -> Result(List(PoolConfig), Nil) {
   }
 }
 
-// Ideally unnamed
-pub external fn start_link(Atom, List(PoolConfig)) -> Result(Dynamic, Dynamic) =
-  "pgo_pool" "start_link"
+pub external type ConnectionPool
+
+pub external fn start(List(PoolConfig)) -> Result(ConnectionPool, Dynamic) =
+  "gleam_pgo_ffi" "start"
 
 /// Type that can be passed as arguments to a query.
 pub external type PgType
@@ -111,7 +119,7 @@ pub fn nullable(value: Option(a), mapper: fn(a) -> PgType) {
 }
 
 external fn run_query(
-  Atom,
+  ConnectionPool,
   String,
   List(PgType),
 ) -> Result(#(QueryCommand, Int, List(Dynamic)), QueryError) =
@@ -124,7 +132,6 @@ pub type QueryCommand {
   Delete
 }
 
-// TODO: redesign errors
 // https://www.postgresql.org/docs/8.1/errcodes-appendix.html
 pub type QueryError {
   ConstrainError(message: String, constraint: String, detail: String)
@@ -134,10 +141,8 @@ pub type QueryError {
   Other(Dynamic)
 }
 
-// TODO: use a decoder
-// TODO: return some better type
 pub fn query(
-  pool: Atom,
+  pool: ConnectionPool,
   sql: String,
   arguments: List(PgType),
 ) -> Result(#(QueryCommand, Int, List(Dynamic)), QueryError) {
