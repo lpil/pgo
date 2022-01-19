@@ -4,7 +4,7 @@ import gleam/int
 import gleam/io
 import gleam/pgo
 import gleam/string
-import gleam/should
+import gleeunit/should
 
 pub fn url_config_test() {
   pgo.url_config("postgres://u:p@db.test:1234/my_db")
@@ -84,8 +84,7 @@ pub fn selecting_rows_test() {
     RETURNING
       id"
   assert Ok(#(_, _, [row])) = pgo.query(conn, sql, [])
-  assert Ok(id) = dynamic.element(row, 0)
-  assert Ok(id) = dynamic.int(id)
+  assert Ok(id) = dynamic.element(0, dynamic.int)(row)
   let sql = string.append("SELECT * FROM cats WHERE id = ", int.to_string(id))
   assert Ok(response) = pgo.query(conn, sql, [])
   response.0

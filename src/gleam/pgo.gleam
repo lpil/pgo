@@ -8,7 +8,6 @@ import gleam/string
 import gleam/io
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
-import gleam/otp/process.{Pid}
 
 // TODO: use a record
 /// Avaliable configuration options when starting a pool.
@@ -32,14 +31,14 @@ fn parse_database_url(
   database_url: String,
 ) -> Result(#(String, String, String, Int), Nil) {
   case uri.parse(database_url) {
-    Uri(
+    Ok(Uri(
       scheme: Some("postgres"),
       userinfo: Some(userinfo),
       host: Some(host),
       port: Some(db_port),
       path: path,
       ..,
-    ) -> Ok(#(userinfo, host, path, db_port))
+    )) -> Ok(#(userinfo, host, path, db_port))
     _ -> Error(Nil)
   }
 }
@@ -62,7 +61,7 @@ pub fn url_config(database_url: String) -> Result(List(PoolConfig), Nil) {
 }
 
 // Ideally unnamed
-pub external fn start_link(Atom, List(PoolConfig)) -> Result(Pid, Dynamic) =
+pub external fn start_link(Atom, List(PoolConfig)) -> Result(Dynamic, Dynamic) =
   "pgo_pool" "start_link"
 
 /// Type that can be passed as arguments to a query.
