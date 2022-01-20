@@ -7,6 +7,7 @@ A PostgreSQL database client for Gleam, based on [PGO][erlang-pgo].
 ```rust
 import gleam/pgo
 import gleam/dynamic
+import gleeunit/should
 
 pub fn main() {
   // Start a database pool.
