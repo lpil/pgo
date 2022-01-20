@@ -21,7 +21,7 @@ pub fn main() {
     (DEFAULT, 'bill', true),
     (DEFAULT, 'felix', false)"
 
-  assert Ok(response) = pgo.query(default, sql, [])
+  assert Ok(response) = pgo.query(pool, sql, [])
 
   response.0
   |> should.equal(pgo.Insert)
