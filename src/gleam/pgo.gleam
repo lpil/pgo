@@ -69,8 +69,11 @@ pub fn url_config(database_url: String) -> Result(List(PoolConfig), Nil) {
 
 pub external type ConnectionPool
 
-pub external fn start(List(PoolConfig)) -> Result(ConnectionPool, Dynamic) =
-  "gleam_pgo_ffi" "start"
+pub external fn start_pool(List(PoolConfig)) -> Result(ConnectionPool, Dynamic) =
+  "gleam_pgo_ffi" "start_pool"
+
+pub external fn stop_pool(ConnectionPool) -> Nil =
+  "gleam_pgo_ffi" "stop_pool"
 
 /// Type that can be passed as arguments to a query.
 pub external type PgType
