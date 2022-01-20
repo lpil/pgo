@@ -29,7 +29,7 @@ pub fn url_config_test() {
 }
 
 fn start_default() {
-  pgo.Config(..pgo.default_config(), database: "gleam_pgo_test")
+  pgo.Config(..pgo.default_config(), database: "gleam_pgo_test", pool_size: 1)
   |> pgo.start_pool
 }
 

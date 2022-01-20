@@ -9,12 +9,16 @@ import gleam/pgo
 import gleam/dynamic
 
 pub fn main() {
+  // Start a database pool.
+  // Typically you will want to create one pool for use in your program
   let pool = pgo.start_pool(pgo.Config(
     ..pgo.default_config(),
     host: "localhost",
     database: "my_database",
+    pool_size: 15,
   ))
 
+  // An SQL statement to run. It takes one int as a parameter
   let sql = "
   select
     name, age, colour, friends
@@ -22,7 +26,8 @@ pub fn main() {
     cats
   where
     id = $1"
-    
+
+  // This is the decoder for the value returned by the query
   let return_type = dynamic.tuple4(
     dynamic.string,
     dynamic.int,
@@ -30,9 +35,12 @@ pub fn main() {
     dynamic.list(dynamic.string),
   )
 
+  // Run the query against the PostgreSQL database
+  // The int `1` is given as a parameter
   assert Ok(response) = 
     pgo.query(pool, sql, [pgo.int(1)], return_type)
 
+  // And then do something with the returned results
   response.0
   |> should.equal(pgo.Insert)
   response.1
