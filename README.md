@@ -6,6 +6,7 @@ A PostgreSQL database client for Gleam, based on [PGO][erlang-pgo].
 
 ```rust
 import gleam/pgo
+import gleam/dynamic
 
 pub fn main() {
   let pool = pgo.start_pool(pgo.Config(
@@ -15,20 +16,31 @@ pub fn main() {
   ))
 
   let sql = "
-  INSERT INTO
+  select
+    name, age, colour, friends
+  from
     cats
-  VALUES
-    (DEFAULT, 'bill', true),
-    (DEFAULT, 'felix', false)"
+  where
+    id = $1"
+    
+  let return_type = dynamic.tuple4(
+    dynamic.string,
+    dynamic.int,
+    dynamic.string,
+    dynamic.list(dynamic.string),
+  )
 
-  assert Ok(response) = pgo.query(pool, sql, [])
+  assert Ok(response) = 
+    pgo.query(pool, sql, [pgo.int(1)], return_type)
 
   response.0
   |> should.equal(pgo.Insert)
   response.1
   |> should.equal(2)
   response.2
-  |> should.equal([])
+  |> should.equal([
+    #("Nubi", 3, "black", ["Al", "Cutlass"]),
+  ])
 }
 ```
 
