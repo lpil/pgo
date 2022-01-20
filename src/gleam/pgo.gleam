@@ -4,14 +4,14 @@
 
 // TODO: remove dynamic usage for arguments
 // TODO: refine errors
-// TODO: use a decode for returned rows?
 // TODO: return a record from query
 // TODO: transactions
 // TODO: json support
 import gleam/erlang/atom
-import gleam/dynamic.{Dynamic}
+import gleam/dynamic.{DecodeErrors, Decoder, Dynamic}
 import gleam/string
-import gleam/io
+import gleam/result
+import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
 
@@ -103,7 +103,6 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
 
 pub external type ConnectionPool
 
-// TODO: warn that it will crash if a connection cannot be established
 pub external fn start_pool(Config) -> ConnectionPool =
   "gleam_pgo_ffi" "start_pool"
 
@@ -160,10 +159,10 @@ external fn run_query(
   ConnectionPool,
   String,
   List(PgType),
-) -> Result(#(QueryCommand, Int, List(Dynamic)), QueryError) =
+) -> Result(#(Command, Int, List(Dynamic)), QueryError) =
   "gleam_pgo_ffi" "query"
 
-pub type QueryCommand {
+pub type Command {
   Insert
   Update
   Select
@@ -175,6 +174,7 @@ pub type QueryError {
   ConstrainError(message: String, constraint: String, detail: String)
   PgsqlError(message: String)
   WrongNumberOfArguments(expected: Int, given: Int)
+  UnexpectedResult(DecodeErrors)
   // This is unsatisfying
   Other(Dynamic)
 }
@@ -183,6 +183,11 @@ pub fn query(
   pool: ConnectionPool,
   sql: String,
   arguments: List(PgType),
-) -> Result(#(QueryCommand, Int, List(Dynamic)), QueryError) {
-  run_query(pool, sql, arguments)
+  decoder: Decoder(t),
+) -> Result(#(Command, Int, List(t)), QueryError) {
+  try #(command, count, rows) = run_query(pool, sql, arguments)
+  try rows =
+    list.try_map(over: rows, with: decoder)
+    |> result.map_error(UnexpectedResult)
+  Ok(#(command, count, rows))
 }

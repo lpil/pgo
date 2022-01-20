@@ -32,7 +32,6 @@ pub fn main() {
 }
 ```
 
-
 ## Installation
 
 ```sh
