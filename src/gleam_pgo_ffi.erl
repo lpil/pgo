@@ -7,10 +7,8 @@
 start_pool(Options) ->
     Id = integer_to_list(erlang:unique_integer([positive])),
     PoolName = list_to_atom("gleam_pgo_pool_" ++ Id),
-    case pgo_pool:start_link(PoolName, Options) of
-        {ok, Pid} -> {ok, #pgo_pool{name = PoolName, pid = Pid}}
-        % TODO: return suitable errors
-    end.
+    {ok, Pid} = pgo_pool:start_link(PoolName, Options),
+    #pgo_pool{name = PoolName, pid = Pid}.
 
 stop_pool(#pgo_pool{pid = Pid}) ->
     erlang:exit(Pid, normal),

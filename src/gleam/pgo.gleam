@@ -69,7 +69,8 @@ pub fn url_config(database_url: String) -> Result(List(PoolConfig), Nil) {
 
 pub external type ConnectionPool
 
-pub external fn start_pool(List(PoolConfig)) -> Result(ConnectionPool, Dynamic) =
+// TODO: warn that it will crash if a connection cannot be established
+pub external fn start_pool(List(PoolConfig)) -> ConnectionPool =
   "gleam_pgo_ffi" "start_pool"
 
 pub external fn stop_pool(ConnectionPool) -> Nil =

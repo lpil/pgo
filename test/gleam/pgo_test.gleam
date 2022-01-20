@@ -26,9 +26,7 @@ pub fn url_config_test() {
 }
 
 fn start_default() {
-  let config = [pgo.Host("localhost"), pgo.Database("gleam_pgo_test")]
-  assert Ok(pool) = pgo.start_pool(config)
-  pool
+  pgo.start_pool([pgo.Host("localhost"), pgo.Database("gleam_pgo_test")])
 }
 
 pub fn inserting_new_rows_test() {
