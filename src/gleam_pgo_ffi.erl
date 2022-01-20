@@ -4,10 +4,43 @@
 
 -record(pgo_pool, {name, pid}).
 
-start_pool(Options) ->
+-include_lib("gleam_pgo/include/gleam@pgo_Config.hrl").
+
+start_pool(Config) ->
     Id = integer_to_list(erlang:unique_integer([positive])),
     PoolName = list_to_atom("gleam_pgo_pool_" ++ Id),
-    {ok, Pid} = pgo_pool:start_link(PoolName, Options),
+    #config{
+        host = Host,
+        port = Port,
+        database = Database,
+        user = User,
+        password = Password,
+        ssl = Ssl,
+        connection_parameters = ConnectionParameters,
+        pool_size = PoolSize,
+        queue_target = QueueTarget,
+        queue_interval = QueueInterval,
+        idle_interval = IdleInterval,
+        trace = Trace
+    } = Config,
+    Options1 = #{
+        host => Host,
+        port => Port,
+        database => Database,
+        user => User,
+        ssl => Ssl,
+        connection_parameters => ConnectionParameters,
+        pool_size => PoolSize,
+        queue_target => QueueTarget,
+        queue_interval => QueueInterval,
+        idle_interval => IdleInterval,
+        trace => Trace
+    },
+    Options2 = case Password of
+        {some, Pw} -> maps:put(password, Pw, Options1);
+        none -> Options1
+    end,
+    {ok, Pid} = pgo_pool:start_link(PoolName, Options2),
     #pgo_pool{name = PoolName, pid = Pid}.
 
 stop_pool(#pgo_pool{pid = Pid}) ->

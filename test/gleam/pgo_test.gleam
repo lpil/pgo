@@ -1,19 +1,22 @@
 import gleam/dynamic
 import gleam/int
-import gleam/io
 import gleam/pgo
+import gleam/option.{Some}
 import gleam/string
 import gleeunit/should
 
 pub fn url_config_test() {
   pgo.url_config("postgres://u:p@db.test:1234/my_db")
-  |> should.equal(Ok([
-    pgo.Host("db.test"),
-    pgo.Port(1234),
-    pgo.Database("my_db"),
-    pgo.User("u"),
-    pgo.Password("p"),
-  ]))
+  |> should.equal(Ok(
+    pgo.Config(
+      ..pgo.default_config(),
+      host: "db.test",
+      port: 1234,
+      database: "my_db",
+      user: "u",
+      password: Some("p"),
+    ),
+  ))
 
   pgo.url_config("foo://u:p@db.test:1234/my_db")
   |> should.equal(Error(Nil))
@@ -26,7 +29,8 @@ pub fn url_config_test() {
 }
 
 fn start_default() {
-  pgo.start_pool([pgo.Host("localhost"), pgo.Database("gleam_pgo_test")])
+  pgo.Config(..pgo.default_config(), database: "gleam_pgo_test")
+  |> pgo.start_pool
 }
 
 pub fn inserting_new_rows_test() {
