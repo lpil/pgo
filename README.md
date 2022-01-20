@@ -10,9 +10,9 @@ import gleam/dynamic
 import gleeunit/should
 
 pub fn main() {
-  // Start a database pool.
+  // Start a database connection pool.
   // Typically you will want to create one pool for use in your program
-  let pool = pgo.start_pool(pgo.Config(
+  let db = pgo.connect(pgo.Config(
     ..pgo.default_config(),
     host: "localhost",
     database: "my_database",
@@ -39,7 +39,7 @@ pub fn main() {
   // Run the query against the PostgreSQL database
   // The int `1` is given as a parameter
   assert Ok(response) = 
-    pgo.query(pool, sql, [pgo.int(1)], return_type)
+    pgo.query(db, sql, [pgo.int(1)], return_type)
 
   // And then do something with the returned results
   response.0

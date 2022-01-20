@@ -30,18 +30,18 @@ pub fn url_config_test() {
 
 fn start_default() {
   pgo.Config(..pgo.default_config(), database: "gleam_pgo_test", pool_size: 1)
-  |> pgo.start_pool
+  |> pgo.connect
 }
 
 pub fn inserting_new_rows_test() {
-  let pool = start_default()
+  let db = start_default()
   let sql =
     "
   INSERT INTO
     cats
   VALUES
     (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)"
-  assert Ok(response) = pgo.query(pool, sql, [], dynamic.dynamic)
+  assert Ok(response) = pgo.query(db, sql, [], dynamic.dynamic)
 
   response.0
   |> should.equal(pgo.Insert)
@@ -50,11 +50,11 @@ pub fn inserting_new_rows_test() {
   response.2
   |> should.equal([])
 
-  pgo.stop_pool(pool)
+  pgo.disconnect(db)
 }
 
 pub fn inserting_new_rows_and_returning_test() {
-  let pool = start_default()
+  let db = start_default()
   let sql =
     "
   INSERT INTO
@@ -64,7 +64,7 @@ pub fn inserting_new_rows_and_returning_test() {
   RETURNING
     name"
   assert Ok(response) =
-    pgo.query(pool, sql, [], dynamic.element(0, dynamic.string))
+    pgo.query(db, sql, [], dynamic.element(0, dynamic.string))
 
   response.0
   |> should.equal(pgo.Insert)
@@ -73,11 +73,11 @@ pub fn inserting_new_rows_and_returning_test() {
   response.2
   |> should.equal(["bill", "felix"])
 
-  pgo.stop_pool(pool)
+  pgo.disconnect(db)
 }
 
 pub fn selecting_rows_test() {
-  let pool = start_default()
+  let db = start_default()
   let sql =
     "
     INSERT INTO
@@ -88,11 +88,11 @@ pub fn selecting_rows_test() {
       id"
 
   assert Ok(#(_, _, [id])) =
-    pgo.query(pool, sql, [], dynamic.element(0, dynamic.int))
+    pgo.query(db, sql, [], dynamic.element(0, dynamic.int))
 
   assert Ok(response) =
     pgo.query(
-      pool,
+      db,
       "SELECT * FROM cats WHERE id = $1",
       [pgo.int(id)],
       dynamic.tuple3(dynamic.int, dynamic.string, dynamic.bool),
@@ -105,24 +105,24 @@ pub fn selecting_rows_test() {
   response.2
   |> should.equal([#(id, "neo", True)])
 
-  pgo.stop_pool(pool)
+  pgo.disconnect(db)
 }
 
 pub fn invalid_sql_test() {
-  let pool = start_default()
+  let db = start_default()
   let sql = "select       select"
 
   assert Error(pgo.PgsqlError(message)) =
-    pgo.query(pool, sql, [], dynamic.dynamic)
+    pgo.query(db, sql, [], dynamic.dynamic)
 
   message
   |> should.equal("syntax error at or near \"select\"")
 
-  pgo.stop_pool(pool)
+  pgo.disconnect(db)
 }
 
 pub fn insert_constraint_error_test() {
-  let pool = start_default()
+  let db = start_default()
   let sql =
     "
     INSERT INTO
@@ -131,7 +131,7 @@ pub fn insert_constraint_error_test() {
       (900, 'bill', true), (900, 'felix', false)"
 
   assert Error(pgo.ConstrainError(message, constraint, detail)) =
-    pgo.query(pool, sql, [], dynamic.dynamic)
+    pgo.query(db, sql, [], dynamic.dynamic)
 
   constraint
   |> should.equal("cats_pkey")
@@ -144,24 +144,24 @@ pub fn insert_constraint_error_test() {
     "duplicate key value violates unique constraint \"cats_pkey\"",
   )
 
-  pgo.stop_pool(pool)
+  pgo.disconnect(db)
 }
 
 pub fn select_from_unknown_table_test() {
-  let pool = start_default()
+  let db = start_default()
   let sql = "SELECT * FROM unknown"
 
   assert Error(pgo.PgsqlError(message)) =
-    pgo.query(pool, sql, [], dynamic.dynamic)
+    pgo.query(db, sql, [], dynamic.dynamic)
 
   message
   |> should.equal("relation \"unknown\" does not exist")
 
-  pgo.stop_pool(pool)
+  pgo.disconnect(db)
 }
 
 pub fn insert_with_incorrect_type_test() {
-  let pool = start_default()
+  let db = start_default()
   let sql =
     "
       INSERT INTO
@@ -169,32 +169,32 @@ pub fn insert_with_incorrect_type_test() {
       VALUES
         (true, true, true)"
   assert Error(pgo.PgsqlError(message)) =
-    pgo.query(pool, sql, [], dynamic.dynamic)
+    pgo.query(db, sql, [], dynamic.dynamic)
 
   message
   |> should.equal(
     "column \"id\" is of type integer but expression is of type boolean",
   )
 
-  pgo.stop_pool(pool)
+  pgo.disconnect(db)
 }
 
 pub fn select_with_incorrect_type_test() {
-  let pool = start_default()
+  let db = start_default()
   let sql = "SELECT * FROM cats WHERE id = $1"
 
   assert Error(pgo.Other(_)) =
-    pgo.query(pool, sql, [pgo.text("True")], dynamic.dynamic)
+    pgo.query(db, sql, [pgo.text("True")], dynamic.dynamic)
 
-  pgo.stop_pool(pool)
+  pgo.disconnect(db)
 }
 
 pub fn query_with_wrong_number_of_arguments_test() {
-  let pool = start_default()
+  let db = start_default()
   let sql = "SELECT * FROM cats WHERE id = $1"
 
-  pgo.query(pool, sql, [], dynamic.dynamic)
+  pgo.query(db, sql, [], dynamic.dynamic)
   |> should.equal(Error(pgo.WrongNumberOfArguments(1, 0)))
 
-  pgo.stop_pool(pool)
+  pgo.disconnect(db)
 }

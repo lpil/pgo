@@ -101,13 +101,13 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
   }
 }
 
-pub external type ConnectionPool
+pub external type Connection
 
-pub external fn start_pool(Config) -> ConnectionPool =
-  "gleam_pgo_ffi" "start_pool"
+pub external fn connect(Config) -> Connection =
+  "gleam_pgo_ffi" "connect"
 
-pub external fn stop_pool(ConnectionPool) -> Nil =
-  "gleam_pgo_ffi" "stop_pool"
+pub external fn disconnect(Connection) -> Nil =
+  "gleam_pgo_ffi" "disconnect"
 
 /// Type that can be passed as arguments to a query.
 pub external type PgType
@@ -156,7 +156,7 @@ pub fn nullable(value: Option(a), mapper: fn(a) -> PgType) {
 }
 
 external fn run_query(
-  ConnectionPool,
+  Connection,
   String,
   List(PgType),
 ) -> Result(#(Command, Int, List(Dynamic)), QueryError) =
@@ -180,7 +180,7 @@ pub type QueryError {
 }
 
 pub fn query(
-  pool: ConnectionPool,
+  pool: Connection,
   sql: String,
   arguments: List(PgType),
   decoder: Decoder(t),

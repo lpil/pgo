@@ -1,12 +1,12 @@
 -module(gleam_pgo_ffi).
 
--export([query/3, start_pool/1, stop_pool/1]).
+-export([query/3, connect/1, disconnect/1]).
 
 -record(pgo_pool, {name, pid}).
 
 -include_lib("gleam_pgo/include/gleam@pgo_Config.hrl").
 
-start_pool(Config) ->
+connect(Config) ->
     Id = integer_to_list(erlang:unique_integer([positive])),
     PoolName = list_to_atom("gleam_pgo_pool_" ++ Id),
     #config{
@@ -43,7 +43,7 @@ start_pool(Config) ->
     {ok, Pid} = pgo_pool:start_link(PoolName, Options2),
     #pgo_pool{name = PoolName, pid = Pid}.
 
-stop_pool(#pgo_pool{pid = Pid}) ->
+disconnect(#pgo_pool{pid = Pid}) ->
     erlang:exit(Pid, normal),
     nil.
 
