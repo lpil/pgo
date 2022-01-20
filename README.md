@@ -1,6 +1,6 @@
 # Gleam PGO
 
-A Postgresql database client for Gleam, based on [PGO][erlang-pgo].
+A PostgreSQL database client for Gleam, based on [PGO][erlang-pgo].
 
 [erlang-pgo]: https://github.com/erleans/pgo
 
@@ -8,9 +8,11 @@ A Postgresql database client for Gleam, based on [PGO][erlang-pgo].
 import gleam/pgo
 
 pub fn main() {
-  let default = atom.create_from_string("default")
-  let config = [pgo.Host("localhost"), pgo.Database("gleam_pgo_test")]
-  let _ = pgo.start_link(default, config)
+  let pool = pgo.start_pool(pgo.Config(
+    ..pgo.default_config(),
+    host: "localhost",
+    database: "my_database",
+  ))
 
   let sql = "
   INSERT INTO
@@ -33,10 +35,6 @@ pub fn main() {
 
 ## Installation
 
-This package can be installed by adding `gleam_pgo` to your `rebar.config` dependencies:
-
-```erlang
-{deps, [
-    gleam_pgo
-]}.
+```sh
+gleam add gleam_pgo
 ```
