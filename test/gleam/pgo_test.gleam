@@ -198,3 +198,19 @@ pub fn query_with_wrong_number_of_arguments_test() {
 
   pgo.disconnect(db)
 }
+
+pub fn execute_returns_nothing_test() {
+  let db = start_default()
+  assert Ok(_) = pgo.execute(db, "delete from cats", [])
+
+  let sql =
+    "
+  insert into
+    cats
+  values
+    (default, 'bill', true), (default, 'felix', false)"
+  assert Ok(#(pgo.Insert, 2)) = pgo.execute(db, sql, [])
+
+  let sql = "select * from cats"
+  assert Ok(#(pgo.Select, 2)) = pgo.execute(db, sql, [])
+}

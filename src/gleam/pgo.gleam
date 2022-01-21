@@ -7,6 +7,7 @@
 // TODO: return a record from query
 // TODO: transactions
 // TODO: json support
+// TODO: docs
 import gleam/erlang/atom
 import gleam/dynamic.{DecodeErrors, Decoder, Dynamic}
 import gleam/string
@@ -190,4 +191,14 @@ pub fn query(
     list.try_map(over: rows, with: decoder)
     |> result.map_error(UnexpectedResult)
   Ok(#(command, count, rows))
+}
+
+// TODO: test
+pub fn execute(
+  pool: Connection,
+  sql: String,
+  arguments: List(PgType),
+) -> Result(#(Command, Int), QueryError) {
+  try #(command, count, _rows) = run_query(pool, sql, arguments)
+  Ok(#(command, count))
 }
