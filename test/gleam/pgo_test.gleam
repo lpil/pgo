@@ -331,3 +331,13 @@ pub fn expected_argument_type_test() {
 
   pgo.disconnect(db)
 }
+
+pub fn expected_return_type_test() {
+  let db = start_default()
+  pgo.query(db, "select 1", [], dynamic.element(0, dynamic.string))
+  |> should.equal(Error(pgo.UnexpectedResultType([
+    dynamic.DecodeError(expected: "String", found: "Int", path: ["0"]),
+  ])))
+
+  pgo.disconnect(db)
+}
