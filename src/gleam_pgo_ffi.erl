@@ -1,10 +1,16 @@
 -module(gleam_pgo_ffi).
 
--export([query/3, connect/1, disconnect/1]).
+-export([query/3, connect/1, disconnect/1, coerce/1, null/0]).
 
 -record(pgo_pool, {name, pid}).
 
 -include_lib("gleam_pgo/include/gleam@pgo_Config.hrl").
+
+null() ->
+    null.
+
+coerce(Value) ->
+    Value.
 
 connect(Config) ->
     Id = integer_to_list(erlang:unique_integer([positive])),

@@ -1,7 +1,7 @@
-import gleam/dynamic
+import gleam/dynamic.{Decoder}
 import gleam/int
 import gleam/pgo
-import gleam/option.{Some}
+import gleam/option.{None, Some}
 import gleam/string
 import gleeunit/should
 
@@ -213,4 +213,100 @@ pub fn execute_returns_nothing_test() {
 
   let sql = "select * from cats"
   assert Ok(#(pgo.Select, 2)) = pgo.execute(db, sql, [])
+}
+
+fn assert_roundtrip(
+  db: pgo.Connection,
+  value: a,
+  type_name: String,
+  encoder: fn(a) -> pgo.PgType,
+  decoder: Decoder(a),
+) -> pgo.Connection {
+  pgo.query(
+    db,
+    string.append("select $1::", type_name),
+    [encoder(value)],
+    dynamic.element(0, decoder),
+  )
+  |> should.equal(Ok(#(pgo.Select, 1, [value])))
+  db
+}
+
+pub fn null_test() {
+  let db = start_default()
+  pgo.query(
+    db,
+    "select $1",
+    [pgo.null()],
+    dynamic.element(0, dynamic.optional(dynamic.int)),
+  )
+  |> should.equal(Ok(#(pgo.Select, 1, [None])))
+
+  pgo.disconnect(db)
+}
+
+pub fn bool_test() {
+  start_default()
+  |> assert_roundtrip(True, "bool", pgo.bool, dynamic.bool)
+  |> assert_roundtrip(False, "bool", pgo.bool, dynamic.bool)
+  |> pgo.disconnect
+}
+
+pub fn int_test() {
+  start_default()
+  |> assert_roundtrip(0, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(1, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(2, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(3, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(4, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(5, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(-0, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(-1, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(-2, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(-3, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(-4, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(-5, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(10000000, "int", pgo.int, dynamic.int)
+  |> pgo.disconnect
+}
+
+pub fn float_test() {
+  start_default()
+  |> assert_roundtrip(0.123, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(1.123, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(2.123, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(3.123, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(4.123, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(5.123, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(-0.654, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(-1.654, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(-2.654, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(-3.654, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(-4.654, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(-5.654, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(10000000.0, "float", pgo.float, dynamic.float)
+  |> pgo.disconnect
+}
+
+pub fn text_test() {
+  start_default()
+  |> assert_roundtrip("", "text", pgo.text, dynamic.string)
+  |> assert_roundtrip("✨", "text", pgo.text, dynamic.string)
+  |> assert_roundtrip("Hello, Joe!", "text", pgo.text, dynamic.string)
+  |> pgo.disconnect
+}
+
+pub fn bytea_test() {
+  start_default()
+  |> assert_roundtrip(<<"":utf8>>, "bytea", pgo.bytea, dynamic.bit_string)
+  |> assert_roundtrip(<<"✨":utf8>>, "bytea", pgo.bytea, dynamic.bit_string)
+  |> assert_roundtrip(
+    <<"Hello, Joe!":utf8>>,
+    "bytea",
+    pgo.bytea,
+    dynamic.bit_string,
+  )
+  |> assert_roundtrip(<<1>>, "bytea", pgo.bytea, dynamic.bit_string)
+  |> assert_roundtrip(<<1, 2, 3>>, "bytea", pgo.bytea, dynamic.bit_string)
+  |> pgo.disconnect
 }

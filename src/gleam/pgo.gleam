@@ -113,45 +113,33 @@ pub external fn disconnect(Connection) -> Nil =
 /// Type that can be passed as arguments to a query.
 pub external type PgType
 
-pub fn null() -> PgType {
-  atom.create_from_string("null")
-  |> dynamic.from()
-  |> dynamic.unsafe_coerce()
-}
+// TODO: test
+pub external fn null() -> PgType =
+  "gleam_pgo_ffi" "null"
 
-pub fn bool(value: Bool) -> PgType {
-  value
-  |> dynamic.from()
-  |> dynamic.unsafe_coerce()
-}
+// TODO: test
+pub external fn bool(Bool) -> PgType =
+  "gleam_pgo_ffi" "coerce"
 
-pub fn int(value: Int) -> PgType {
-  value
-  |> dynamic.from()
-  |> dynamic.unsafe_coerce()
-}
+// TODO: test
+pub external fn int(Int) -> PgType =
+  "gleam_pgo_ffi" "coerce"
 
-pub fn float(value: Float) -> PgType {
-  value
-  |> dynamic.from()
-  |> dynamic.unsafe_coerce()
-}
+// TODO: test
+pub external fn float(Float) -> PgType =
+  "gleam_pgo_ffi" "coerce"
 
-pub fn text(value: String) -> PgType {
-  value
-  |> dynamic.from()
-  |> dynamic.unsafe_coerce()
-}
+// TODO: test
+pub external fn text(String) -> PgType =
+  "gleam_pgo_ffi" "coerce"
 
-pub fn bytea(value: BitString) -> PgType {
-  value
-  |> dynamic.from()
-  |> dynamic.unsafe_coerce()
-}
+// TODO: test
+pub external fn bytea(BitString) -> PgType =
+  "gleam_pgo_ffi" "coerce"
 
-pub fn nullable(value: Option(a), mapper: fn(a) -> PgType) {
+pub fn nullable(inner_type: fn(a) -> PgType, value: Option(a)) -> PgType {
   case value {
-    Some(term) -> mapper(term)
+    Some(term) -> inner_type(term)
     None -> null()
   }
 }
