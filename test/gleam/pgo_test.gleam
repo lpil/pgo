@@ -41,11 +41,11 @@ pub fn inserting_new_rows_test() {
     cats
   VALUES
     (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)"
-  assert Ok(response) = pgo.query(db, sql, [], dynamic.dynamic)
+  assert Ok(returned) = pgo.query(db, sql, [], dynamic.dynamic)
 
-  response.0
+  returned.count
   |> should.equal(2)
-  response.1
+  returned.rows
   |> should.equal([])
 
   pgo.disconnect(db)
@@ -61,12 +61,12 @@ pub fn inserting_new_rows_and_returning_test() {
     (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)
   RETURNING
     name"
-  assert Ok(response) =
+  assert Ok(returned) =
     pgo.query(db, sql, [], dynamic.element(0, dynamic.string))
 
-  response.0
+  returned.count
   |> should.equal(2)
-  response.1
+  returned.rows
   |> should.equal(["bill", "felix"])
 
   pgo.disconnect(db)
@@ -83,10 +83,10 @@ pub fn selecting_rows_test() {
     RETURNING
       id"
 
-  assert Ok(#(_, [id])) =
+  assert Ok(pgo.Returned(rows: [id], ..)) =
     pgo.query(db, sql, [], dynamic.element(0, dynamic.int))
 
-  assert Ok(response) =
+  assert Ok(returned) =
     pgo.query(
       db,
       "SELECT * FROM cats WHERE id = $1",
@@ -94,9 +94,9 @@ pub fn selecting_rows_test() {
       dynamic.tuple3(dynamic.int, dynamic.string, dynamic.bool),
     )
 
-  response.0
+  returned.count
   |> should.equal(1)
-  response.1
+  returned.rows
   |> should.equal([#(id, "neo", True)])
 
   pgo.disconnect(db)
@@ -222,7 +222,7 @@ fn assert_roundtrip(
     [encoder(value)],
     dynamic.element(0, decoder),
   )
-  |> should.equal(Ok(#(1, [value])))
+  |> should.equal(Ok(pgo.Returned(count: 1, rows: [value])))
   db
 }
 
@@ -234,7 +234,7 @@ pub fn null_test() {
     [pgo.null()],
     dynamic.element(0, dynamic.optional(dynamic.int)),
   )
-  |> should.equal(Ok(#(1, [None])))
+  |> should.equal(Ok(pgo.Returned(count: 1, rows: [None])))
 
   pgo.disconnect(db)
 }

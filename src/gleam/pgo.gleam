@@ -3,7 +3,6 @@
 //// Gleam wrapper around pgo library
 
 // TODO: refine errors
-// TODO: return a record from query
 // TODO: transactions
 // TODO: json support
 // TODO: docs
@@ -138,6 +137,10 @@ pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   }
 }
 
+pub type Returned(t) {
+  Returned(count: Int, rows: List(t))
+}
+
 external fn run_query(
   Connection,
   String,
@@ -160,12 +163,12 @@ pub fn query(
   sql: String,
   arguments: List(Value),
   decoder: Decoder(t),
-) -> Result(#(Int, List(t)), QueryError) {
+) -> Result(Returned(t), QueryError) {
   try #(count, rows) = run_query(pool, sql, arguments)
   try rows =
     list.try_map(over: rows, with: decoder)
     |> result.map_error(UnexpectedResult)
-  Ok(#(count, rows))
+  Ok(Returned(count, rows))
 }
 
 // TODO: test
