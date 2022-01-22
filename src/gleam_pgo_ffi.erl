@@ -72,7 +72,11 @@ convert_error({pgsql_error, #{
 }}) ->
     {constraint_violated, Message, Constraint, Detail};
 convert_error({pgsql_error, #{code := Code, message := Message}}) ->
-    {pgsql_error, Code, Message};
+    Constant = case gleam@pgo:error_code_name(Code) of
+        {ok, X} -> X;
+        {error, nil} -> <<"unknown">>
+    end,
+    {postgresql_error, Code, Constant, Message};
 convert_error(#{
     error := badarg_encoding,
     type_info := #type_info{name = Expected},

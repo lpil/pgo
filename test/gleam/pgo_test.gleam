@@ -106,11 +106,13 @@ pub fn invalid_sql_test() {
   let db = start_default()
   let sql = "select       select"
 
-  assert Error(pgo.PgsqlError(code, message)) =
+  assert Error(pgo.PostgresqlError(code, name, message)) =
     pgo.query(db, sql, [], dynamic.dynamic)
 
   code
   |> should.equal("42601")
+  name
+  |> should.equal("syntax_error")
   message
   |> should.equal("syntax error at or near \"select\"")
 
@@ -147,11 +149,13 @@ pub fn select_from_unknown_table_test() {
   let db = start_default()
   let sql = "SELECT * FROM unknown"
 
-  assert Error(pgo.PgsqlError(code, message)) =
+  assert Error(pgo.PostgresqlError(code, name, message)) =
     pgo.query(db, sql, [], dynamic.dynamic)
 
   code
   |> should.equal("42P01")
+  name
+  |> should.equal("undefined_table")
   message
   |> should.equal("relation \"unknown\" does not exist")
 
@@ -166,11 +170,13 @@ pub fn insert_with_incorrect_type_test() {
         cats
       VALUES
         (true, true, true)"
-  assert Error(pgo.PgsqlError(code, message)) =
+  assert Error(pgo.PostgresqlError(code, name, message)) =
     pgo.query(db, sql, [], dynamic.dynamic)
 
   code
   |> should.equal("42804")
+  name
+  |> should.equal("datatype_mismatch")
   message
   |> should.equal(
     "column \"id\" is of type integer but expression is of type boolean",
