@@ -219,7 +219,7 @@ fn assert_roundtrip(
   db: pgo.Connection,
   value: a,
   type_name: String,
-  encoder: fn(a) -> pgo.PgType,
+  encoder: fn(a) -> pgo.Value,
   decoder: Decoder(a),
 ) -> pgo.Connection {
   pgo.query(
@@ -308,5 +308,34 @@ pub fn bytea_test() {
   )
   |> assert_roundtrip(<<1>>, "bytea", pgo.bytea, dynamic.bit_string)
   |> assert_roundtrip(<<1, 2, 3>>, "bytea", pgo.bytea, dynamic.bit_string)
+  |> pgo.disconnect
+}
+
+pub fn nullable_test() {
+  start_default()
+  |> assert_roundtrip(
+    Some("Hello, Joe"),
+    "text",
+    pgo.nullable(pgo.text, _),
+    dynamic.optional(dynamic.string),
+  )
+  |> assert_roundtrip(
+    None,
+    "text",
+    pgo.nullable(pgo.text, _),
+    dynamic.optional(dynamic.string),
+  )
+  |> assert_roundtrip(
+    Some(123),
+    "int",
+    pgo.nullable(pgo.int, _),
+    dynamic.optional(dynamic.int),
+  )
+  |> assert_roundtrip(
+    None,
+    "int",
+    pgo.nullable(pgo.int, _),
+    dynamic.optional(dynamic.int),
+  )
   |> pgo.disconnect
 }

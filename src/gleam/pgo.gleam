@@ -110,34 +110,29 @@ pub external fn connect(Config) -> Connection =
 pub external fn disconnect(Connection) -> Nil =
   "gleam_pgo_ffi" "disconnect"
 
-/// Type that can be passed as arguments to a query.
-pub external type PgType
+/// A value that can be sent to PostgreSQL as one of the arguments to a
+/// parameterised SQL query.
+pub external type Value
 
-// TODO: test
-pub external fn null() -> PgType =
+pub external fn null() -> Value =
   "gleam_pgo_ffi" "null"
 
-// TODO: test
-pub external fn bool(Bool) -> PgType =
+pub external fn bool(Bool) -> Value =
   "gleam_pgo_ffi" "coerce"
 
-// TODO: test
-pub external fn int(Int) -> PgType =
+pub external fn int(Int) -> Value =
   "gleam_pgo_ffi" "coerce"
 
-// TODO: test
-pub external fn float(Float) -> PgType =
+pub external fn float(Float) -> Value =
   "gleam_pgo_ffi" "coerce"
 
-// TODO: test
-pub external fn text(String) -> PgType =
+pub external fn text(String) -> Value =
   "gleam_pgo_ffi" "coerce"
 
-// TODO: test
-pub external fn bytea(BitString) -> PgType =
+pub external fn bytea(BitString) -> Value =
   "gleam_pgo_ffi" "coerce"
 
-pub fn nullable(inner_type: fn(a) -> PgType, value: Option(a)) -> PgType {
+pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   case value {
     Some(term) -> inner_type(term)
     None -> null()
@@ -147,7 +142,7 @@ pub fn nullable(inner_type: fn(a) -> PgType, value: Option(a)) -> PgType {
 external fn run_query(
   Connection,
   String,
-  List(PgType),
+  List(Value),
 ) -> Result(#(Command, Int, List(Dynamic)), QueryError) =
   "gleam_pgo_ffi" "query"
 
@@ -171,7 +166,7 @@ pub type QueryError {
 pub fn query(
   pool: Connection,
   sql: String,
-  arguments: List(PgType),
+  arguments: List(Value),
   decoder: Decoder(t),
 ) -> Result(#(Command, Int, List(t)), QueryError) {
   try #(command, count, rows) = run_query(pool, sql, arguments)
@@ -185,7 +180,7 @@ pub fn query(
 pub fn execute(
   pool: Connection,
   sql: String,
-  arguments: List(PgType),
+  arguments: List(Value),
 ) -> Result(#(Command, Int), QueryError) {
   try #(command, count, _rows) = run_query(pool, sql, arguments)
   Ok(#(command, count))
