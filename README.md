@@ -42,11 +42,9 @@ pub fn main() {
     pgo.query(db, sql, [pgo.int(1)], return_type)
 
   // And then do something with the returned results
-  response.0
-  |> should.equal(pgo.Insert)
-  response.1
+  response.count
   |> should.equal(2)
-  response.2
+  response.rows
   |> should.equal([
     #("Nubi", 3, "black", ["Al", "Cutlass"]),
   ])
