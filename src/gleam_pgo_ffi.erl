@@ -55,8 +55,8 @@ disconnect(#pgo_pool{pid = Pid}) ->
 
 query(#pgo_pool{name = Name}, Sql, Arguments) ->
     case pgo:query(Sql, Arguments, #{pool => Name}) of
-        #{command := Command, rows := Rows, num_rows := NumRows} ->
-            {ok, {Command, NumRows, Rows}};
+        #{rows := Rows, num_rows := NumRows} ->
+            {ok, {NumRows, Rows}};
 
         {error, Error} ->
             {error, convert_error(Error)}

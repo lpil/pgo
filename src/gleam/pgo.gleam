@@ -2,7 +2,6 @@
 ////
 //// Gleam wrapper around pgo library
 
-// TODO: remove dynamic usage for arguments
 // TODO: refine errors
 // TODO: return a record from query
 // TODO: transactions
@@ -143,15 +142,8 @@ external fn run_query(
   Connection,
   String,
   List(Value),
-) -> Result(#(Command, Int, List(Dynamic)), QueryError) =
+) -> Result(#(Int, List(Dynamic)), QueryError) =
   "gleam_pgo_ffi" "query"
-
-pub type Command {
-  Insert
-  Update
-  Select
-  Delete
-}
 
 // https://www.postgresql.org/docs/8.1/errcodes-appendix.html
 pub type QueryError {
@@ -168,12 +160,12 @@ pub fn query(
   sql: String,
   arguments: List(Value),
   decoder: Decoder(t),
-) -> Result(#(Command, Int, List(t)), QueryError) {
-  try #(command, count, rows) = run_query(pool, sql, arguments)
+) -> Result(#(Int, List(t)), QueryError) {
+  try #(count, rows) = run_query(pool, sql, arguments)
   try rows =
     list.try_map(over: rows, with: decoder)
     |> result.map_error(UnexpectedResult)
-  Ok(#(command, count, rows))
+  Ok(#(count, rows))
 }
 
 // TODO: test
@@ -181,7 +173,7 @@ pub fn execute(
   pool: Connection,
   sql: String,
   arguments: List(Value),
-) -> Result(#(Command, Int), QueryError) {
-  try #(command, count, _rows) = run_query(pool, sql, arguments)
-  Ok(#(command, count))
+) -> Result(Int, QueryError) {
+  try #(count, _rows) = run_query(pool, sql, arguments)
+  Ok(count)
 }
