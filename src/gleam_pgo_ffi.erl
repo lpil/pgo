@@ -70,15 +70,13 @@ convert_error({pgsql_error, #{
     constraint := Constraint, 
     detail := Detail
 }}) ->
-    {constrain_error, Message, Constraint, Detail};
-convert_error({pgsql_error, #{message := Message}}) ->
-    {pgsql_error, Message};
+    {constraint_violated, Message, Constraint, Detail};
+convert_error({pgsql_error, #{code := Code, message := Message}}) ->
+    {pgsql_error, Code, Message};
 convert_error(#{
     error := badarg_encoding,
     type_info := #type_info{name = Expected},
     value := Value
 }) ->
     Got = list_to_binary(io_lib:format("~p", [Value])),
-    {unexpected_argument_type, Expected, Got};
-convert_error(Other) ->
-    {other, Other}.
+    {unexpected_argument_type, Expected, Got}.

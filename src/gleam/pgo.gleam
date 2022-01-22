@@ -155,21 +155,18 @@ external fn run_query(
 // TODO: docs
 // https://www.postgresql.org/docs/8.1/errcodes-appendix.html
 pub type QueryError {
-  // TODO: test
-  // TODO: rename
-  ConstrainError(message: String, constraint: String, detail: String)
+  // TODO: document
+  ConstraintViolated(message: String, constraint: String, detail: String)
   // TODO: test
   // TODO: rename
   // TODO: refine
-  PgsqlError(message: String)
+  PgsqlError(code: String, message: String)
   // TODO: document
   UnexpectedArgumentCount(expected: Int, got: Int)
   // TODO: document
   UnexpectedArgumentType(expected: String, got: String)
   // TODO: document
   UnexpectedResultType(DecodeErrors)
-  // This is unsatisfying
-  Other(Dynamic)
 }
 
 // TODO: docs

@@ -106,9 +106,11 @@ pub fn invalid_sql_test() {
   let db = start_default()
   let sql = "select       select"
 
-  assert Error(pgo.PgsqlError(message)) =
+  assert Error(pgo.PgsqlError(code, message)) =
     pgo.query(db, sql, [], dynamic.dynamic)
 
+  code
+  |> should.equal("42601")
   message
   |> should.equal("syntax error at or near \"select\"")
 
@@ -124,7 +126,7 @@ pub fn insert_constraint_error_test() {
     VALUES
       (900, 'bill', true), (900, 'felix', false)"
 
-  assert Error(pgo.ConstrainError(message, constraint, detail)) =
+  assert Error(pgo.ConstraintViolated(message, constraint, detail)) =
     pgo.query(db, sql, [], dynamic.dynamic)
 
   constraint
@@ -145,9 +147,11 @@ pub fn select_from_unknown_table_test() {
   let db = start_default()
   let sql = "SELECT * FROM unknown"
 
-  assert Error(pgo.PgsqlError(message)) =
+  assert Error(pgo.PgsqlError(code, message)) =
     pgo.query(db, sql, [], dynamic.dynamic)
 
+  code
+  |> should.equal("42P01")
   message
   |> should.equal("relation \"unknown\" does not exist")
 
@@ -162,9 +166,11 @@ pub fn insert_with_incorrect_type_test() {
         cats
       VALUES
         (true, true, true)"
-  assert Error(pgo.PgsqlError(message)) =
+  assert Error(pgo.PgsqlError(code, message)) =
     pgo.query(db, sql, [], dynamic.dynamic)
 
+  code
+  |> should.equal("42804")
   message
   |> should.equal(
     "column \"id\" is of type integer but expression is of type boolean",
