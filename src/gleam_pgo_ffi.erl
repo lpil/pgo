@@ -5,6 +5,7 @@
 -record(pgo_pool, {name, pid}).
 
 -include_lib("gleam_pgo/include/gleam@pgo_Config.hrl").
+-include_lib("pg_types/include/pg_types.hrl").
 
 null() ->
     null.
@@ -72,5 +73,12 @@ convert_error({pgsql_error, #{
     {constrain_error, Message, Constraint, Detail};
 convert_error({pgsql_error, #{message := Message}}) ->
     {pgsql_error, Message};
+convert_error(#{
+    error := badarg_encoding,
+    type_info := #type_info{name = Expected},
+    value := Value
+}) ->
+    Got = list_to_binary(io_lib:format("~p", [Value])),
+    {unexpected_argument_type, Expected, Got};
 convert_error(Other) ->
     {other, Other}.

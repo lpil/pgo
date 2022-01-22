@@ -173,16 +173,6 @@ pub fn insert_with_incorrect_type_test() {
   pgo.disconnect(db)
 }
 
-pub fn select_with_incorrect_type_test() {
-  let db = start_default()
-  let sql = "SELECT * FROM cats WHERE id = $1"
-
-  assert Error(pgo.Other(_)) =
-    pgo.query(db, sql, [pgo.text("True")], dynamic.dynamic)
-
-  pgo.disconnect(db)
-}
-
 pub fn query_with_wrong_number_of_arguments_test() {
   let db = start_default()
   let sql = "SELECT * FROM cats WHERE id = $1"
@@ -332,4 +322,12 @@ pub fn nullable_test() {
     dynamic.optional(dynamic.int),
   )
   |> pgo.disconnect
+}
+
+pub fn expected_argument_type_test() {
+  let db = start_default()
+  pgo.query(db, "select $1::int", [pgo.float(1.2)], dynamic.int)
+  |> should.equal(Error(pgo.UnexpectedArgumentType("int4", "1.2")))
+
+  pgo.disconnect(db)
 }

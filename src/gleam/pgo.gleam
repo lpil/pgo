@@ -5,7 +5,6 @@
 // TODO: refine errors
 // TODO: transactions
 // TODO: json support
-// TODO: docs
 import gleam/erlang/atom
 import gleam/dynamic.{DecodeErrors, Decoder, Dynamic}
 import gleam/string
@@ -14,6 +13,7 @@ import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
 
+// TODO: docs
 pub type Config {
   Config(
     /// (default: 127.0.0.1): Database server hostname.
@@ -52,6 +52,7 @@ pub type Config {
   )
 }
 
+// TODO: docs
 pub fn default_config() -> Config {
   Config(
     host: "127.0.0.1",
@@ -69,6 +70,7 @@ pub fn default_config() -> Config {
   )
 }
 
+// TODO: docs
 /// Parse a database url into an option list that can be used to start a pool.
 pub fn url_config(database_url: String) -> Result(Config, Nil) {
   try uri = uri.parse(database_url)
@@ -100,6 +102,7 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
   }
 }
 
+// TODO: docs
 pub external type Connection
 
 pub external fn connect(Config) -> Connection =
@@ -137,6 +140,7 @@ pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   }
 }
 
+// TODO: docs
 pub type Returned(t) {
   Returned(count: Int, rows: List(t))
 }
@@ -148,16 +152,29 @@ external fn run_query(
 ) -> Result(#(Int, List(Dynamic)), QueryError) =
   "gleam_pgo_ffi" "query"
 
+// TODO: docs
 // https://www.postgresql.org/docs/8.1/errcodes-appendix.html
 pub type QueryError {
+  // TODO: test
+  // TODO: rename
   ConstrainError(message: String, constraint: String, detail: String)
+  // TODO: test
+  // TODO: rename
+  // TODO: refine
   PgsqlError(message: String)
+  // TODO: test
+  // TODO: rename
+  // TODO: refine
   WrongNumberOfArguments(expected: Int, given: Int)
-  UnexpectedResult(DecodeErrors)
+  // TODO: test
+  UnexpectedResultType(DecodeErrors)
+  // TODO: test
+  UnexpectedArgumentType(expected: String, got: String)
   // This is unsatisfying
   Other(Dynamic)
 }
 
+// TODO: docs
 pub fn query(
   pool: Connection,
   sql: String,
@@ -167,11 +184,11 @@ pub fn query(
   try #(count, rows) = run_query(pool, sql, arguments)
   try rows =
     list.try_map(over: rows, with: decoder)
-    |> result.map_error(UnexpectedResult)
+    |> result.map_error(UnexpectedResultType)
   Ok(Returned(count, rows))
 }
 
-// TODO: test
+// TODO: docs
 pub fn execute(
   pool: Connection,
   sql: String,
