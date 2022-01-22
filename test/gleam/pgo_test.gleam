@@ -178,7 +178,7 @@ pub fn query_with_wrong_number_of_arguments_test() {
   let sql = "SELECT * FROM cats WHERE id = $1"
 
   pgo.query(db, sql, [], dynamic.dynamic)
-  |> should.equal(Error(pgo.WrongNumberOfArguments(1, 0)))
+  |> should.equal(Error(pgo.UnexpectedArgumentCount(expected: 1, got: 0)))
 
   pgo.disconnect(db)
 }

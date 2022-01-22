@@ -64,7 +64,7 @@ query(#pgo_pool{name = Name}, Sql, Arguments) ->
     end.
 
 convert_error({pgo_protocol, {parameters, Expected, Got}}) ->
-    {wrong_number_of_arguments, Expected, Got};
+    {unexpected_argument_count, Expected, Got};
 convert_error({pgsql_error, #{
     message := Message, 
     constraint := Constraint, 

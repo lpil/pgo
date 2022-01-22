@@ -162,14 +162,12 @@ pub type QueryError {
   // TODO: rename
   // TODO: refine
   PgsqlError(message: String)
-  // TODO: test
-  // TODO: rename
-  // TODO: refine
-  WrongNumberOfArguments(expected: Int, given: Int)
-  // TODO: test
-  UnexpectedResultType(DecodeErrors)
-  // TODO: test
+  // TODO: document
+  UnexpectedArgumentCount(expected: Int, got: Int)
+  // TODO: document
   UnexpectedArgumentType(expected: String, got: String)
+  // TODO: document
+  UnexpectedResultType(DecodeErrors)
   // This is unsatisfying
   Other(Dynamic)
 }
