@@ -2,9 +2,8 @@
 ////
 //// Gleam wrapper around pgo library
 
-// TODO: refine errors
 // TODO: transactions
-// TODO: json support
+// TODO: JSON support
 import gleam/erlang/atom
 import gleam/dynamic.{DecodeErrors, Decoder, Dynamic}
 import gleam/string
@@ -13,7 +12,7 @@ import gleam/list
 import gleam/option.{None, Option, Some}
 import gleam/uri.{Uri}
 
-// TODO: docs
+/// The configuration for a pool of connections.
 pub type Config {
   Config(
     /// (default: 127.0.0.1): Database server hostname.
@@ -52,7 +51,9 @@ pub type Config {
   )
 }
 
-// TODO: docs
+/// The default configuration for a connection pool, with a single connection.
+/// You will likely want to increase the size of the pool for your application.
+///
 pub fn default_config() -> Config {
   Config(
     host: "127.0.0.1",
@@ -70,8 +71,7 @@ pub fn default_config() -> Config {
   )
 }
 
-// TODO: docs
-/// Parse a database url into an option list that can be used to start a pool.
+/// Parse a database url into configuration that can be used to start a pool.
 pub fn url_config(database_url: String) -> Result(Config, Nil) {
   try uri = uri.parse(database_url)
   try #(userinfo, host, path, db_port) = case uri {
@@ -102,12 +102,23 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
   }
 }
 
-// TODO: docs
+/// A pool of one or more database connections against which queries can be
+/// made.
+///
+/// Created using the `connect` function and shut-down with the `disconnect`
+/// function.
 pub external type Connection
 
+/// Start a database connection pool.
+///
+/// The pool is started in a new process and will asynchronously connect to the
+/// PostgreSQL instance specified in the config. If the configuration is invalid
+/// or it cannot connect for another reason it will continue to attempt to
+/// connect, and any queries made using the connection pool will fail.
 pub external fn connect(Config) -> Connection =
   "gleam_pgo_ffi" "connect"
 
+/// Shut down a connection pool.
 pub external fn disconnect(Connection) -> Nil =
   "gleam_pgo_ffi" "disconnect"
 
@@ -140,7 +151,7 @@ pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   }
 }
 
-// TODO: docs
+/// The rows and number of rows that are returned by a database query.
 pub type Returned(t) {
   Returned(count: Int, rows: List(t))
 }
@@ -152,29 +163,34 @@ external fn run_query(
 ) -> Result(#(Int, List(Dynamic)), QueryError) =
   "gleam_pgo_ffi" "query"
 
-// TODO: docs
 pub type QueryError {
-  // TODO: document
+  /// The query failed as a database constraint would have been violated by the
+  /// change.
   ConstraintViolated(message: String, constraint: String, detail: String)
-  // TODO: test
-  // TODO: rename
-  // TODO: refine
+  /// The query failed within the database.
   /// https://www.postgresql.org/docs/current/errcodes-appendix.html
   PostgresqlError(code: String, name: String, message: String)
-  // TODO: document
+  // The number of arguments supplied did not match the number of parameters
+  // that the query has.
   UnexpectedArgumentCount(expected: Int, got: Int)
-  // TODO: document
+  /// One of the arguments supplied was not of the type that the query required.
   UnexpectedArgumentType(expected: String, got: String)
-  // TODO: document
+  /// The rows returned by the database could not be decoded using the supplied
+  /// dynamic decoder.
   UnexpectedResultType(DecodeErrors)
 }
 
-// TODO: docs
+/// Run a query against a PostgreSQL database.
+///
+/// The provided dynamic decoder is used to decode the rows returned by
+/// PostgreSQL. If you are not interested in any returned rows you may want to
+/// use the `execute` function.
+///
 pub fn query(
-  pool: Connection,
-  sql: String,
-  arguments: List(Value),
-  decoder: Decoder(t),
+  on pool: Connection,
+  run sql: String,
+  with arguments: List(Value),
+  returning decoder: Decoder(t),
 ) -> Result(Returned(t), QueryError) {
   try #(count, rows) = run_query(pool, sql, arguments)
   try rows =
@@ -183,17 +199,24 @@ pub fn query(
   Ok(Returned(count, rows))
 }
 
-// TODO: docs
+/// Run a query against a PostgreSQL database, discarding any results.
+///
 pub fn execute(
-  pool: Connection,
-  sql: String,
-  arguments: List(Value),
+  on pool: Connection,
+  run sql: String,
+  with arguments: List(Value),
 ) -> Result(Int, QueryError) {
   try #(count, _rows) = run_query(pool, sql, arguments)
   Ok(count)
 }
 
-// TODO: docs
+/// Get the name for a PostgreSQL error code.
+///
+/// ```gleam
+/// > error_code_name("01007")
+/// Ok("privilege_not_granted")
+/// ```
+///
 /// https://www.postgresql.org/docs/current/errcodes-appendix.html
 pub fn error_code_name(error_code: String) -> Result(String, Nil) {
   case error_code {

@@ -150,7 +150,7 @@ pub fn select_from_unknown_table_test() {
   let sql = "SELECT * FROM unknown"
 
   assert Error(pgo.PostgresqlError(code, name, message)) =
-    pgo.query(db, sql, [], dynamic.dynamic)
+    pgo.query(on: db, run: sql, with: [], returning: dynamic.dynamic)
 
   code
   |> should.equal("42P01")
