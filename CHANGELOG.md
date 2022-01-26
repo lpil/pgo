@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.2.0 - Unreleased
+## v0.2.0 - 2022-01-26
 
 - Migrate to the Gleam build tool.
 - API redesigned.
