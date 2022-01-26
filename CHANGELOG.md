@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.0 - Unreleased
+
+- Migrate to the Gleam build tool.
+- API redesigned.
+
 ## v0.1.1 - 2020-11-26
 
 - Dependencies updates and versions relaxed.
