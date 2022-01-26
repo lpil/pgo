@@ -41,7 +41,7 @@ pub fn inserting_new_rows_test() {
     cats
   VALUES
     (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)"
-  assert Ok(returned) = pgo.query(db, sql, [], dynamic.dynamic)
+  assert Ok(returned) = pgo.execute(sql, db, [], dynamic.dynamic)
 
   returned.count
   |> should.equal(2)
@@ -62,7 +62,7 @@ pub fn inserting_new_rows_and_returning_test() {
   RETURNING
     name"
   assert Ok(returned) =
-    pgo.query(db, sql, [], dynamic.element(0, dynamic.string))
+    pgo.execute(sql, db, [], dynamic.element(0, dynamic.string))
 
   returned.count
   |> should.equal(2)
@@ -84,12 +84,12 @@ pub fn selecting_rows_test() {
       id"
 
   assert Ok(pgo.Returned(rows: [id], ..)) =
-    pgo.query(db, sql, [], dynamic.element(0, dynamic.int))
+    pgo.execute(sql, db, [], dynamic.element(0, dynamic.int))
 
   assert Ok(returned) =
-    pgo.query(
-      db,
+    pgo.execute(
       "SELECT * FROM cats WHERE id = $1",
+      db,
       [pgo.int(id)],
       dynamic.tuple3(dynamic.int, dynamic.string, dynamic.bool),
     )
@@ -107,7 +107,7 @@ pub fn invalid_sql_test() {
   let sql = "select       select"
 
   assert Error(pgo.PostgresqlError(code, name, message)) =
-    pgo.query(db, sql, [], dynamic.dynamic)
+    pgo.execute(sql, db, [], dynamic.dynamic)
 
   code
   |> should.equal("42601")
@@ -129,7 +129,7 @@ pub fn insert_constraint_error_test() {
       (900, 'bill', true), (900, 'felix', false)"
 
   assert Error(pgo.ConstraintViolated(message, constraint, detail)) =
-    pgo.query(db, sql, [], dynamic.dynamic)
+    pgo.execute(sql, db, [], dynamic.dynamic)
 
   constraint
   |> should.equal("cats_pkey")
@@ -150,7 +150,7 @@ pub fn select_from_unknown_table_test() {
   let sql = "SELECT * FROM unknown"
 
   assert Error(pgo.PostgresqlError(code, name, message)) =
-    pgo.query(on: db, run: sql, with: [], returning: dynamic.dynamic)
+    pgo.execute(on: db, query: sql, with: [], expecting: dynamic.dynamic)
 
   code
   |> should.equal("42P01")
@@ -171,7 +171,7 @@ pub fn insert_with_incorrect_type_test() {
       VALUES
         (true, true, true)"
   assert Error(pgo.PostgresqlError(code, name, message)) =
-    pgo.query(db, sql, [], dynamic.dynamic)
+    pgo.execute(sql, db, [], dynamic.dynamic)
 
   code
   |> should.equal("42804")
@@ -185,30 +185,14 @@ pub fn insert_with_incorrect_type_test() {
   pgo.disconnect(db)
 }
 
-pub fn query_with_wrong_number_of_arguments_test() {
+pub fn execute_with_wrong_number_of_arguments_test() {
   let db = start_default()
   let sql = "SELECT * FROM cats WHERE id = $1"
 
-  pgo.query(db, sql, [], dynamic.dynamic)
+  pgo.execute(sql, db, [], dynamic.dynamic)
   |> should.equal(Error(pgo.UnexpectedArgumentCount(expected: 1, got: 0)))
 
   pgo.disconnect(db)
-}
-
-pub fn execute_returns_nothing_test() {
-  let db = start_default()
-  assert Ok(_) = pgo.execute(db, "delete from cats", [])
-
-  let sql =
-    "
-  insert into
-    cats
-  values
-    (default, 'bill', true), (default, 'felix', false)"
-  assert Ok(2) = pgo.execute(db, sql, [])
-
-  let sql = "select * from cats"
-  assert Ok(2) = pgo.execute(db, sql, [])
 }
 
 fn assert_roundtrip(
@@ -218,9 +202,9 @@ fn assert_roundtrip(
   encoder: fn(a) -> pgo.Value,
   decoder: Decoder(a),
 ) -> pgo.Connection {
-  pgo.query(
-    db,
+  pgo.execute(
     string.append("select $1::", type_name),
+    db,
     [encoder(value)],
     dynamic.element(0, decoder),
   )
@@ -230,9 +214,9 @@ fn assert_roundtrip(
 
 pub fn null_test() {
   let db = start_default()
-  pgo.query(
-    db,
+  pgo.execute(
     "select $1",
+    db,
     [pgo.null()],
     dynamic.element(0, dynamic.optional(dynamic.int)),
   )
@@ -338,7 +322,7 @@ pub fn nullable_test() {
 
 pub fn expected_argument_type_test() {
   let db = start_default()
-  pgo.query(db, "select $1::int", [pgo.float(1.2)], dynamic.int)
+  pgo.execute("select $1::int", db, [pgo.float(1.2)], dynamic.int)
   |> should.equal(Error(pgo.UnexpectedArgumentType("int4", "1.2")))
 
   pgo.disconnect(db)
@@ -346,7 +330,7 @@ pub fn expected_argument_type_test() {
 
 pub fn expected_return_type_test() {
   let db = start_default()
-  pgo.query(db, "select 1", [], dynamic.element(0, dynamic.string))
+  pgo.execute("select 1", db, [], dynamic.element(0, dynamic.string))
   |> should.equal(Error(pgo.UnexpectedResultType([
     dynamic.DecodeError(expected: "String", found: "Int", path: ["0"]),
   ])))

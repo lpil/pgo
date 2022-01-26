@@ -184,30 +184,19 @@ pub type QueryError {
 ///
 /// The provided dynamic decoder is used to decode the rows returned by
 /// PostgreSQL. If you are not interested in any returned rows you may want to
-/// use the `execute` function.
+/// use the `dynamic.dynamic` decoder.
 ///
-pub fn query(
+pub fn execute(
+  query sql: String,
   on pool: Connection,
-  run sql: String,
   with arguments: List(Value),
-  returning decoder: Decoder(t),
+  expecting decoder: Decoder(t),
 ) -> Result(Returned(t), QueryError) {
   try #(count, rows) = run_query(pool, sql, arguments)
   try rows =
     list.try_map(over: rows, with: decoder)
     |> result.map_error(UnexpectedResultType)
   Ok(Returned(count, rows))
-}
-
-/// Run a query against a PostgreSQL database, discarding any results.
-///
-pub fn execute(
-  on pool: Connection,
-  run sql: String,
-  with arguments: List(Value),
-) -> Result(Int, QueryError) {
-  try #(count, _rows) = run_query(pool, sql, arguments)
-  Ok(count)
 }
 
 /// Get the name for a PostgreSQL error code.
