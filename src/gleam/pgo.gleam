@@ -4,7 +4,6 @@
 
 // TODO: transactions
 // TODO: JSON support
-import gleam/erlang/atom
 import gleam/dynamic.{DecodeErrors, Decoder, Dynamic}
 import gleam/string
 import gleam/result

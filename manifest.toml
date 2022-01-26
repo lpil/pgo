@@ -3,16 +3,14 @@
 
 packages = [
   { name = "backoff", version = "1.1.6", build_tools = ["rebar3"], requirements = [], otp_app = "backoff", source = "hex", outer_checksum = "CF0CFFF8995FB20562F822E5CC47D8CCF664C5ECDC26A684CBE85C225F9D7C39" },
-  { name = "gleam_erlang", version = "0.8.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleam_erlang", source = "hex", outer_checksum = "AF437B787D8FFE3608BA71AB879FBAAC52B2B3312F09403C27B1847476588313" },
   { name = "gleam_stdlib", version = "0.19.3", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "CA579C2FF0621E93FF6EFEF61BAFFCF0505732BA073F616E28878042F1A1F401" },
   { name = "gleeunit", version = "0.6.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleeunit", source = "hex", outer_checksum = "77701A5E5A565727E1EEAC9196FB878D544049B6331CD0305B5A69699135EA1C" },
   { name = "pg_types", version = "0.4.0", build_tools = ["rebar3"], requirements = [], otp_app = "pg_types", source = "hex", outer_checksum = "B02EFA785CAECECF9702C681C80A9CA12A39F9161A846CE17B01FB20AEEED7EB" },
-  { name = "pgo", version = "0.11.1", build_tools = ["rebar3"], requirements = ["backoff", "pg_types", "telemetry"], otp_app = "pgo", source = "hex", outer_checksum = "30F38CA823A98C41EF23967D133E91B45AD14AEE0766F4773E88BCCF46BA17A5" },
+  { name = "pgo", version = "0.11.1", build_tools = ["rebar3"], requirements = ["backoff", "telemetry", "pg_types"], otp_app = "pgo", source = "hex", outer_checksum = "30F38CA823A98C41EF23967D133E91B45AD14AEE0766F4773E88BCCF46BA17A5" },
   { name = "telemetry", version = "0.4.3", build_tools = ["rebar3"], requirements = [], otp_app = "telemetry", source = "hex", outer_checksum = "EB72B8365FFDA5BED68A620D1DA88525E326CB82A75EE61354FC24B844768041" },
 ]
 
 [requirements]
-gleam_erlang = "~> 0.8"
 gleam_stdlib = "~> 0.19"
 gleeunit = "~> 0.6"
 pgo = "~> 0.11"
