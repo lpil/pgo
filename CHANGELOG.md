@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.0 - Unreleased
+
+- Added the `ConnectionUnavailable` error variant.
+
 ## v0.2.0 - 2022-01-26
 
 - Migrate to the Gleam build tool.
