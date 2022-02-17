@@ -177,6 +177,9 @@ pub type QueryError {
   /// The rows returned by the database could not be decoded using the supplied
   /// dynamic decoder.
   UnexpectedResultType(DecodeErrors)
+  /// No connection was available to execute the query. This may be due to
+  /// invalid connection details such as an invalid username or password.
+  ConnectionUnavailable
 }
 
 /// Run a query against a PostgreSQL database.

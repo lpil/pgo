@@ -63,6 +63,8 @@ query(#pgo_pool{name = Name}, Sql, Arguments) ->
             {error, convert_error(Error)}
     end.
 
+convert_error(none_available) ->
+    connection_unavailable;
 convert_error({pgo_protocol, {parameters, Expected, Got}}) ->
     {unexpected_argument_count, Expected, Got};
 convert_error({pgsql_error, #{
