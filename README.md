@@ -4,7 +4,7 @@ A PostgreSQL database client for Gleam, based on [PGO][erlang-pgo].
 
 [erlang-pgo]: https://github.com/erleans/pgo
 
-```rust
+```gleam
 import gleam/pgo
 import gleam/dynamic
 import gleeunit/should
