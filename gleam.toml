@@ -10,8 +10,8 @@ links = [
 ]
 
 [dependencies]
-gleam_stdlib = "~> 0.19"
-pgo = "~> 0.11"
+gleam_stdlib = "~> 0.20"
+pgo = "~> 0.12"
 
 [dev-dependencies]
 gleeunit = "~> 0.6"
