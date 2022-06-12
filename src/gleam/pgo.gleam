@@ -47,7 +47,17 @@ pub type Config {
     ///
     /// [1]: https://opencensus.io/
     trace: Bool,
+    /// Which internet protocol to use for this connection
+    ip_version: IpVersion,
   )
+}
+
+/// The internet protocol version to use.
+pub type IpVersion {
+  /// Internet Protocol version 6 (IPv6)
+  Ipv4
+  /// Internet Protocol version 4 (IPv4)
+  Ipv6
 }
 
 /// The default configuration for a connection pool, with a single connection.
@@ -67,6 +77,7 @@ pub fn default_config() -> Config {
     queue_interval: 1000,
     idle_interval: 1000,
     trace: False,
+    ip_version: Ipv4,
   )
 }
 
