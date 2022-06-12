@@ -1,5 +1,4 @@
 import gleam/dynamic.{Decoder}
-import gleam/int
 import gleam/pgo
 import gleam/option.{None, Some}
 import gleam/string
