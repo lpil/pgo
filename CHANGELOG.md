@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0 - 2022-06-12
+
+- IPv6 is now supported through a config option.
+
 ## v0.3.0 - 2022-02-17
 
 - Added the `ConnectionUnavailable` error variant.
