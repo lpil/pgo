@@ -28,7 +28,8 @@ connect(Config) ->
         queue_target = QueueTarget,
         queue_interval = QueueInterval,
         idle_interval = IdleInterval,
-        trace = Trace
+        trace = Trace,
+        ip_version = IpVersion
     } = Config,
     Options1 = #{
         host => Host,
@@ -41,7 +42,11 @@ connect(Config) ->
         queue_target => QueueTarget,
         queue_interval => QueueInterval,
         idle_interval => IdleInterval,
-        trace => Trace
+        trace => Trace,
+        socket_options => case IpVersion of
+            ipv4 -> [];
+            ipv6 -> [inet6]
+        end
     },
     Options2 = case Password of
         {some, Pw} -> maps:put(password, Pw, Options1);
