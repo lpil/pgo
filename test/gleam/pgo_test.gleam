@@ -416,3 +416,38 @@ pub fn expected_return_type_test() {
 
   pgo.disconnect(db)
 }
+
+pub fn transaction_commit_test() {
+  let db = start_default()
+
+  // Success Commit Case
+  assert Ok(pgo.Returned(count: _, rows: [returned_id])) =
+    pgo.transaction(
+      db,
+      fn() {
+        let sql =
+          "
+  INSERT INTO
+    cats
+  VALUES
+    (default, 'bill', true) returning id"
+        pgo.inner_execute(sql, [], dynamic.element(0, dynamic.int))
+      },
+    )
+
+  assert Ok(first_select) =
+    pgo.execute(
+      "select id from cats where id = $1",
+      db,
+      [pgo.int(returned_id)],
+      dynamic.element(0, dynamic.int),
+    )
+
+  first_select.count
+  |> should.equal(1)
+
+  first_select.rows
+  |> should.equal([returned_id])
+
+  pgo.disconnect(db)
+}
