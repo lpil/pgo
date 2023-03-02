@@ -40,7 +40,7 @@ pub fn inserting_new_rows_test() {
     cats
   VALUES
     (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)"
-  assert Ok(returned) = pgo.execute(sql, db, [], dynamic.dynamic)
+  let assert Ok(returned) = pgo.execute(sql, db, [], dynamic.dynamic)
 
   returned.count
   |> should.equal(2)
@@ -60,7 +60,7 @@ pub fn inserting_new_rows_and_returning_test() {
     (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)
   RETURNING
     name"
-  assert Ok(returned) =
+  let assert Ok(returned) =
     pgo.execute(sql, db, [], dynamic.element(0, dynamic.string))
 
   returned.count
@@ -82,10 +82,10 @@ pub fn selecting_rows_test() {
     RETURNING
       id"
 
-  assert Ok(pgo.Returned(rows: [id], ..)) =
+  let assert Ok(pgo.Returned(rows: [id], ..)) =
     pgo.execute(sql, db, [], dynamic.element(0, dynamic.int))
 
-  assert Ok(returned) =
+  let assert Ok(returned) =
     pgo.execute(
       "SELECT * FROM cats WHERE id = $1",
       db,
@@ -105,7 +105,7 @@ pub fn invalid_sql_test() {
   let db = start_default()
   let sql = "select       select"
 
-  assert Error(pgo.PostgresqlError(code, name, message)) =
+  let assert Error(pgo.PostgresqlError(code, name, message)) =
     pgo.execute(sql, db, [], dynamic.dynamic)
 
   code
@@ -127,7 +127,7 @@ pub fn insert_constraint_error_test() {
     VALUES
       (900, 'bill', true), (900, 'felix', false)"
 
-  assert Error(pgo.ConstraintViolated(message, constraint, detail)) =
+  let assert Error(pgo.ConstraintViolated(message, constraint, detail)) =
     pgo.execute(sql, db, [], dynamic.dynamic)
 
   constraint
@@ -148,7 +148,7 @@ pub fn select_from_unknown_table_test() {
   let db = start_default()
   let sql = "SELECT * FROM unknown"
 
-  assert Error(pgo.PostgresqlError(code, name, message)) =
+  let assert Error(pgo.PostgresqlError(code, name, message)) =
     pgo.execute(on: db, query: sql, with: [], expecting: dynamic.dynamic)
 
   code
@@ -169,7 +169,7 @@ pub fn insert_with_incorrect_type_test() {
         cats
       VALUES
         (true, true, true)"
-  assert Error(pgo.PostgresqlError(code, name, message)) =
+  let assert Error(pgo.PostgresqlError(code, name, message)) =
     pgo.execute(sql, db, [], dynamic.dynamic)
 
   code
@@ -245,7 +245,7 @@ pub fn int_test() {
   |> assert_roundtrip(-3, "int", pgo.int, dynamic.int)
   |> assert_roundtrip(-4, "int", pgo.int, dynamic.int)
   |> assert_roundtrip(-5, "int", pgo.int, dynamic.int)
-  |> assert_roundtrip(10000000, "int", pgo.int, dynamic.int)
+  |> assert_roundtrip(10_000_000, "int", pgo.int, dynamic.int)
   |> pgo.disconnect
 }
 
@@ -263,7 +263,7 @@ pub fn float_test() {
   |> assert_roundtrip(-3.654, "float", pgo.float, dynamic.float)
   |> assert_roundtrip(-4.654, "float", pgo.float, dynamic.float)
   |> assert_roundtrip(-5.654, "float", pgo.float, dynamic.float)
-  |> assert_roundtrip(10000000.0, "float", pgo.float, dynamic.float)
+  |> assert_roundtrip(10_000_000.0, "float", pgo.float, dynamic.float)
   |> pgo.disconnect
 }
 

@@ -83,8 +83,8 @@ pub fn default_config() -> Config {
 
 /// Parse a database url into configuration that can be used to start a pool.
 pub fn url_config(database_url: String) -> Result(Config, Nil) {
-  try uri = uri.parse(database_url)
-  try #(userinfo, host, path, db_port) = case uri {
+  use uri <- result.then(uri.parse(database_url))
+  use #(userinfo, host, path, db_port) <- result.then(case uri {
     Uri(
       scheme: Some("postgres"),
       userinfo: Some(userinfo),
@@ -94,8 +94,8 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
       ..,
     ) -> Ok(#(userinfo, host, path, db_port))
     _ -> Error(Nil)
-  }
-  try #(user, password) = string.split_once(userinfo, ":")
+  })
+  use #(user, password) <- result.then(string.split_once(userinfo, ":"))
   case string.split(path, "/") {
     ["", database] ->
       Ok(
@@ -205,10 +205,11 @@ pub fn execute(
   with arguments: List(Value),
   expecting decoder: Decoder(t),
 ) -> Result(Returned(t), QueryError) {
-  try #(count, rows) = run_query(pool, sql, arguments)
-  try rows =
+  use #(count, rows) <- result.then(run_query(pool, sql, arguments))
+  use rows <- result.then(
     list.try_map(over: rows, with: decoder)
-    |> result.map_error(UnexpectedResultType)
+    |> result.map_error(UnexpectedResultType),
+  )
   Ok(Returned(count, rows))
 }
 

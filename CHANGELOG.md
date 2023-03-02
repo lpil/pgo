@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.1 - 2023-03-02
+
+- Updated for Gleam v0.27.0.
+
 ## v0.4.0 - 2022-06-12
 
 - IPv6 is now supported through a config option.
