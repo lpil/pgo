@@ -117,7 +117,7 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
 ///
 /// Created using the `connect` function and shut-down with the `disconnect`
 /// function.
-pub external type Connection
+pub type Connection
 
 /// Start a database connection pool.
 ///
@@ -125,34 +125,34 @@ pub external type Connection
 /// PostgreSQL instance specified in the config. If the configuration is invalid
 /// or it cannot connect for another reason it will continue to attempt to
 /// connect, and any queries made using the connection pool will fail.
-pub external fn connect(Config) -> Connection =
-  "gleam_pgo_ffi" "connect"
+@external(erlang, "gleam_pgo_ffi", "connect")
+pub fn connect(a: Config) -> Connection
 
 /// Shut down a connection pool.
-pub external fn disconnect(Connection) -> Nil =
-  "gleam_pgo_ffi" "disconnect"
+@external(erlang, "gleam_pgo_ffi", "disconnect")
+pub fn disconnect(a: Connection) -> Nil
 
 /// A value that can be sent to PostgreSQL as one of the arguments to a
 /// parameterised SQL query.
-pub external type Value
+pub type Value
 
-pub external fn null() -> Value =
-  "gleam_pgo_ffi" "null"
+@external(erlang, "gleam_pgo_ffi", "null")
+pub fn null() -> Value
 
-pub external fn bool(Bool) -> Value =
-  "gleam_pgo_ffi" "coerce"
+@external(erlang, "gleam_pgo_ffi", "coerce")
+pub fn bool(a: Bool) -> Value
 
-pub external fn int(Int) -> Value =
-  "gleam_pgo_ffi" "coerce"
+@external(erlang, "gleam_pgo_ffi", "coerce")
+pub fn int(a: Int) -> Value
 
-pub external fn float(Float) -> Value =
-  "gleam_pgo_ffi" "coerce"
+@external(erlang, "gleam_pgo_ffi", "coerce")
+pub fn float(a: Float) -> Value
 
-pub external fn text(String) -> Value =
-  "gleam_pgo_ffi" "coerce"
+@external(erlang, "gleam_pgo_ffi", "coerce")
+pub fn text(a: String) -> Value
 
-pub external fn bytea(BitString) -> Value =
-  "gleam_pgo_ffi" "coerce"
+@external(erlang, "gleam_pgo_ffi", "coerce")
+pub fn bytea(a: BitString) -> Value
 
 pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   case value {
@@ -166,12 +166,12 @@ pub type Returned(t) {
   Returned(count: Int, rows: List(t))
 }
 
-external fn run_query(
-  Connection,
-  String,
-  List(Value),
-) -> Result(#(Int, List(Dynamic)), QueryError) =
-  "gleam_pgo_ffi" "query"
+@external(erlang, "gleam_pgo_ffi", "query")
+fn run_query(
+  a: Connection,
+  b: String,
+  c: List(Value),
+) -> Result(#(Int, List(Dynamic)), QueryError)
 
 pub type QueryError {
   /// The query failed as a database constraint would have been violated by the
