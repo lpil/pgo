@@ -1,5 +1,5 @@
 name = "gleam_pgo"
-version = "0.4.1"
+version = "0.5.0"
 licences = ["Apache-2.0"]
 description = "Gleam bindings to the PGO PostgreSQL client"
 
