@@ -3,15 +3,15 @@
 
 packages = [
   { name = "backoff", version = "1.1.6", build_tools = ["rebar3"], requirements = [], otp_app = "backoff", source = "hex", outer_checksum = "CF0CFFF8995FB20562F822E5CC47D8CCF664C5ECDC26A684CBE85C225F9D7C39" },
-  { name = "gleam_stdlib", version = "0.27.0", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "9DBDD21B48C654182CDD8AA15ACF85E8E74A0438583C68BD7EF08BE89F999C6F" },
-  { name = "gleeunit", version = "0.10.1", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleeunit", source = "hex", outer_checksum = "ECEA2DE4BE6528D36AFE74F42A21CDF99966EC36D7F25DEB34D47DD0F7977BAF" },
-  { name = "opentelemetry_api", version = "1.2.1", build_tools = ["rebar3", "mix"], requirements = ["opentelemetry_semantic_conventions"], otp_app = "opentelemetry_api", source = "hex", outer_checksum = "6D7A27B7CAD2AD69A09CABF6670514CAFCEC717C8441BEB5C96322BAC3D05350" },
+  { name = "gleam_stdlib", version = "0.32.0", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "07D64C26D014CF570F8ACADCE602761EA2E74C842D26F2FD49B0D61973D9966F" },
+  { name = "gleeunit", version = "1.0.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleeunit", source = "hex", outer_checksum = "D3682ED8C5F9CAE1C928F2506DE91625588CC752495988CBE0F5653A42A6F334" },
+  { name = "opentelemetry_api", version = "1.2.2", build_tools = ["rebar3", "mix"], requirements = ["opentelemetry_semantic_conventions"], otp_app = "opentelemetry_api", source = "hex", outer_checksum = "DC77B9A00F137A858E60A852F14007BB66EDA1FFBEB6C05D5FE6C9E678B05E9D" },
   { name = "opentelemetry_semantic_conventions", version = "0.2.0", build_tools = ["rebar3", "mix"], requirements = [], otp_app = "opentelemetry_semantic_conventions", source = "hex", outer_checksum = "D61FA1F5639EE8668D74B527E6806E0503EFC55A42DB7B5F39939D84C07D6895" },
   { name = "pg_types", version = "0.4.0", build_tools = ["rebar3"], requirements = [], otp_app = "pg_types", source = "hex", outer_checksum = "B02EFA785CAECECF9702C681C80A9CA12A39F9161A846CE17B01FB20AEEED7EB" },
-  { name = "pgo", version = "0.13.0", build_tools = ["rebar3"], requirements = ["backoff", "pg_types", "opentelemetry_api"], otp_app = "pgo", source = "hex", outer_checksum = "1B0ADAB78300D23FD49A0D03A987EC9531960FDB208F51C3E07AED9F5367523B" },
+  { name = "pgo", version = "0.14.0", build_tools = ["rebar3"], requirements = ["backoff", "pg_types", "opentelemetry_api"], otp_app = "pgo", source = "hex", outer_checksum = "71016C22599936E042DC0012EE4589D24C71427D266292F775EBF201D97DF9C9" },
 ]
 
 [requirements]
-gleam_stdlib = "~> 0.20"
-gleeunit = "~> 0.6"
-pgo = "~> 0.12"
+gleam_stdlib = { version = "~> 0.20" }
+gleeunit = { version = "~> 1.0" }
+pgo = { version = "~> 0.12" }

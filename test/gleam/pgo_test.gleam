@@ -1,4 +1,4 @@
-import gleam/dynamic.{Decoder}
+import gleam/dynamic.{type Decoder}
 import gleam/pgo
 import gleam/option.{None, Some}
 import gleam/string
@@ -277,16 +277,16 @@ pub fn text_test() {
 
 pub fn bytea_test() {
   start_default()
-  |> assert_roundtrip(<<"":utf8>>, "bytea", pgo.bytea, dynamic.bit_string)
-  |> assert_roundtrip(<<"✨":utf8>>, "bytea", pgo.bytea, dynamic.bit_string)
+  |> assert_roundtrip(<<"":utf8>>, "bytea", pgo.bytea, dynamic.bit_array)
+  |> assert_roundtrip(<<"✨":utf8>>, "bytea", pgo.bytea, dynamic.bit_array)
   |> assert_roundtrip(
     <<"Hello, Joe!":utf8>>,
     "bytea",
     pgo.bytea,
-    dynamic.bit_string,
+    dynamic.bit_array,
   )
-  |> assert_roundtrip(<<1>>, "bytea", pgo.bytea, dynamic.bit_string)
-  |> assert_roundtrip(<<1, 2, 3>>, "bytea", pgo.bytea, dynamic.bit_string)
+  |> assert_roundtrip(<<1>>, "bytea", pgo.bytea, dynamic.bit_array)
+  |> assert_roundtrip(<<1, 2, 3>>, "bytea", pgo.bytea, dynamic.bit_array)
   |> pgo.disconnect
 }
 

@@ -1,9 +1,8 @@
 name = "gleam_pgo"
 version = "0.5.0"
+gleam = ">= 0.32.0"
 licences = ["Apache-2.0"]
 description = "Gleam bindings to the PGO PostgreSQL client"
-
-gleam = ">= 0.30.0"
 
 repository = { type = "github", user = "gleam-experiments", repo = "pgo" }
 links = [
@@ -16,4 +15,4 @@ gleam_stdlib = "~> 0.20"
 pgo = "~> 0.12"
 
 [dev-dependencies]
-gleeunit = "~> 0.6"
+gleeunit = "~> 1.0"

@@ -4,11 +4,11 @@
 
 // TODO: transactions
 // TODO: JSON support
-import gleam/dynamic.{DecodeErrors, Decoder, Dynamic}
+import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
 import gleam/string
 import gleam/result
 import gleam/list
-import gleam/option.{None, Option, Some}
+import gleam/option.{type Option, None, Some}
 import gleam/uri.{Uri}
 
 /// The configuration for a pool of connections.
@@ -152,7 +152,7 @@ pub fn float(a: Float) -> Value
 pub fn text(a: String) -> Value
 
 @external(erlang, "gleam_pgo_ffi", "coerce")
-pub fn bytea(a: BitString) -> Value
+pub fn bytea(a: BitArray) -> Value
 
 pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   case value {
