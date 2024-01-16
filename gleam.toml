@@ -1,5 +1,5 @@
 name = "gleam_pgo"
-version = "0.6.0"
+version = "0.6.1"
 gleam = ">= 0.32.0"
 licences = ["Apache-2.0"]
 description = "Gleam bindings to the PGO PostgreSQL client"
@@ -11,7 +11,7 @@ links = [
 ]
 
 [dependencies]
-gleam_stdlib = "~> 0.20"
+gleam_stdlib = "~> 0.20 or ~> 1.0"
 pgo = "~> 0.12"
 
 [dev-dependencies]
