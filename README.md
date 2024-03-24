@@ -38,7 +38,7 @@ pub fn main() {
 
   // Run the query against the PostgreSQL database
   // The int `1` is given as a parameter
-  assert Ok(response) = 
+  let assert Ok(response) = 
     pgo.execute(sql, db, [pgo.int(1)], return_type)
 
   // And then do something with the returned results
