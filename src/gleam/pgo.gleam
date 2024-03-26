@@ -2,7 +2,6 @@
 ////
 //// Gleam wrapper around pgo library
 
-// TODO: transactions
 // TODO: JSON support
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
 import gleam/string
@@ -154,6 +153,12 @@ pub fn text(a: String) -> Value
 @external(erlang, "gleam_pgo_ffi", "coerce")
 pub fn bytea(a: BitArray) -> Value
 
+pub external fn transaction(
+  pool: Connection,
+  fn() -> Result(Returned(t), QueryError),
+) -> Result(Returned(t), QueryError) =
+  "gleam_pgo_ffi" "transaction"
+
 pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   case value {
     Some(term) -> inner_type(term)
@@ -172,6 +177,12 @@ fn run_query(
   b: String,
   c: List(Value),
 ) -> Result(#(Int, List(Dynamic)), QueryError)
+
+external fn run_query_without_pool(
+  String,
+  List(Value),
+) -> Result(#(Int, List(Dynamic)), QueryError) =
+  "gleam_pgo_ffi" "query_without_pool"
 
 pub type QueryError {
   /// The query failed as a database constraint would have been violated by the
@@ -210,6 +221,18 @@ pub fn execute(
     list.try_map(over: rows, with: decoder)
     |> result.map_error(UnexpectedResultType),
   )
+  Ok(Returned(count, rows))
+}
+
+pub fn inner_execute(
+  query sql: String,
+  with arguments: List(Value),
+  expecting decoder: Decoder(t),
+) -> Result(Returned(t), QueryError) {
+  try #(count, rows) = run_query_without_pool(sql, arguments)
+  try rows =
+    list.try_map(over: rows, with: decoder)
+    |> result.map_error(UnexpectedResultType)
   Ok(Returned(count, rows))
 }
 
