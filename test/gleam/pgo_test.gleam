@@ -1,10 +1,10 @@
 import gleam/dynamic.{type Decoder}
-import gleam/pgo
 import gleam/option.{None, Some}
+import gleam/pgo
 import gleam/string
 import gleeunit/should
 
-pub fn url_config_test() {
+pub fn url_config_everything_test() {
   pgo.url_config("postgres://u:p@db.test:1234/my_db")
   |> should.equal(Ok(
     pgo.Config(
@@ -16,13 +16,28 @@ pub fn url_config_test() {
       password: Some("p"),
     ),
   ))
+}
 
+pub fn url_config_not_postgres_protocol_test() {
   pgo.url_config("foo://u:p@db.test:1234/my_db")
   |> should.equal(Error(Nil))
+}
 
+pub fn url_config_no_password_test() {
   pgo.url_config("postgres://u@db.test:1234/my_db")
-  |> should.equal(Error(Nil))
+  |> should.equal(Ok(
+    pgo.Config(
+      ..pgo.default_config(),
+      host: "db.test",
+      port: 1234,
+      database: "my_db",
+      user: "u",
+      password: None,
+    ),
+  ))
+}
 
+pub fn url_config_path_slash_test() {
   pgo.url_config("postgres://u:p@db.test:1234/my_db/foo")
   |> should.equal(Error(Nil))
 }

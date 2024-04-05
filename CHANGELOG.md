@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.7.0 - 2024-04-05
+
+- The password is now optional in the `url_config` function, defaulting to no
+  password if none is given.
+
 ## v0.6.1 - 2024-01-16
 
 - Relaxed the stdlib version constraint.

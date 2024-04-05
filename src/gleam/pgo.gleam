@@ -5,10 +5,11 @@
 // TODO: transactions
 // TODO: JSON support
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
-import gleam/string
-import gleam/result
+
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/result
+import gleam/string
 import gleam/uri.{Uri}
 
 /// The configuration for a pool of connections.
@@ -86,16 +87,20 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
   use uri <- result.then(uri.parse(database_url))
   use #(userinfo, host, path, db_port) <- result.then(case uri {
     Uri(
-      scheme: Some("postgres"),
-      userinfo: Some(userinfo),
-      host: Some(host),
-      port: Some(db_port),
-      path: path,
-      ..,
-    ) -> Ok(#(userinfo, host, path, db_port))
+        scheme: Some("postgres"),
+        userinfo: Some(userinfo),
+        host: Some(host),
+        port: Some(db_port),
+        path: path,
+        ..,
+      ) -> Ok(#(userinfo, host, path, db_port))
     _ -> Error(Nil)
   })
-  use #(user, password) <- result.then(string.split_once(userinfo, ":"))
+  use #(user, password) <- result.then(case string.split(userinfo, ":") {
+    [user] -> Ok(#(user, None))
+    [user, password] -> Ok(#(user, Some(password)))
+    _ -> Error(Nil)
+  })
   case string.split(path, "/") {
     ["", database] ->
       Ok(
@@ -105,7 +110,7 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
           port: db_port,
           database: database,
           user: user,
-          password: Some(password),
+          password: password,
         ),
       )
     _ -> Error(Nil)
