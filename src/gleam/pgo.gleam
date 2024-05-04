@@ -161,6 +161,9 @@ pub fn bytea(a: BitArray) -> Value
 @external(erlang, "gleam_pgo_ffi", "coerce")
 pub fn array(a: List(a)) -> Value
 
+@external(erlang, "gleam_pgo_ffi", "coerce")
+pub fn timestamp(a: #(#(Int, Int, Int), #(Int, Int, Int))) -> Value
+
 pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   case value {
     Some(term) -> inner_type(term)
