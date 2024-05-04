@@ -43,7 +43,12 @@ pub fn url_config_path_slash_test() {
 }
 
 fn start_default() {
-  pgo.Config(..pgo.default_config(), database: "gleam_pgo_test", pool_size: 1)
+  pgo.Config(
+    ..pgo.default_config(),
+    database: "gleam_pgo_test",
+    password: Some("postgres"),
+    pool_size: 1,
+  )
   |> pgo.connect
 }
 
