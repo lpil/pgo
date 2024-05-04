@@ -17,7 +17,8 @@ DROP TABLE IF EXISTS cats;
 CREATE TABLE cats (
   id SERIAL PRIMARY KEY,
   name VARCHAR(50) NOT NULL,
-  is_cute boolean NOT NULL DEFAULT true
+  is_cute boolean NOT NULL DEFAULT true,
+  colors VARCHAR(50)[] NOT NULL
 );
 SQL
 

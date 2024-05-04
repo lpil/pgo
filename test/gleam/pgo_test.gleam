@@ -54,7 +54,7 @@ pub fn inserting_new_rows_test() {
   INSERT INTO
     cats
   VALUES
-    (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)"
+    (DEFAULT, 'bill', true, ARRAY ['black']), (DEFAULT, 'felix', false, ARRAY ['grey'])"
   let assert Ok(returned) = pgo.execute(sql, db, [], dynamic.dynamic)
 
   returned.count
@@ -72,7 +72,7 @@ pub fn inserting_new_rows_and_returning_test() {
   INSERT INTO
     cats
   VALUES
-    (DEFAULT, 'bill', true), (DEFAULT, 'felix', false)
+    (DEFAULT, 'bill', true, ARRAY ['black']), (DEFAULT, 'felix', false, ARRAY ['grey'])
   RETURNING
     name"
   let assert Ok(returned) =
@@ -93,7 +93,7 @@ pub fn selecting_rows_test() {
     INSERT INTO
       cats
     VALUES
-      (DEFAULT, 'neo', true)
+      (DEFAULT, 'neo', true, ARRAY ['black'])
     RETURNING
       id"
 
@@ -105,13 +105,18 @@ pub fn selecting_rows_test() {
       "SELECT * FROM cats WHERE id = $1",
       db,
       [pgo.int(id)],
-      dynamic.tuple3(dynamic.int, dynamic.string, dynamic.bool),
+      dynamic.tuple4(
+        dynamic.int,
+        dynamic.string,
+        dynamic.bool,
+        dynamic.list(dynamic.string),
+      ),
     )
 
   returned.count
   |> should.equal(1)
   returned.rows
-  |> should.equal([#(id, "neo", True)])
+  |> should.equal([#(id, "neo", True, ["black"])])
 
   pgo.disconnect(db)
 }
@@ -140,7 +145,7 @@ pub fn insert_constraint_error_test() {
     INSERT INTO
       cats
     VALUES
-      (900, 'bill', true), (900, 'felix', false)"
+      (900, 'bill', true, ARRAY ['black']), (900, 'felix', false, ARRAY ['black'])"
 
   let assert Error(pgo.ConstraintViolated(message, constraint, detail)) =
     pgo.execute(sql, db, [], dynamic.dynamic)
@@ -183,7 +188,7 @@ pub fn insert_with_incorrect_type_test() {
       INSERT INTO
         cats
       VALUES
-        (true, true, true)"
+        (true, true, true, true)"
   let assert Error(pgo.PostgresqlError(code, name, message)) =
     pgo.execute(sql, db, [], dynamic.dynamic)
 
@@ -302,6 +307,15 @@ pub fn bytea_test() {
   )
   |> assert_roundtrip(<<1>>, "bytea", pgo.bytea, dynamic.bit_array)
   |> assert_roundtrip(<<1, 2, 3>>, "bytea", pgo.bytea, dynamic.bit_array)
+  |> pgo.disconnect
+}
+
+pub fn array_test() {
+  let decoder = dynamic.list(dynamic.string)
+  start_default()
+  |> assert_roundtrip(["black"], "text[]", pgo.array, decoder)
+  |> assert_roundtrip(["gray"], "text[]", pgo.array, decoder)
+  |> assert_roundtrip(["gray", "black"], "text[]", pgo.array, decoder)
   |> pgo.disconnect
 }
 
