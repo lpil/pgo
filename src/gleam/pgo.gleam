@@ -5,7 +5,6 @@
 // TODO: transactions
 // TODO: JSON support
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
-
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
@@ -158,6 +157,9 @@ pub fn text(a: String) -> Value
 
 @external(erlang, "gleam_pgo_ffi", "coerce")
 pub fn bytea(a: BitArray) -> Value
+
+@external(erlang, "gleam_pgo_ffi", "coerce")
+pub fn array(a: List(a)) -> Value
 
 pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   case value {
