@@ -59,7 +59,8 @@ pub fn inserting_new_rows_test() {
   INSERT INTO
     cats
   VALUES
-    (DEFAULT, 'bill', true, ARRAY ['black']), (DEFAULT, 'felix', false, ARRAY ['grey'])"
+    (DEFAULT, 'bill', true, ARRAY ['black'], now()),
+    (DEFAULT, 'felix', false, ARRAY ['grey'], now())"
   let assert Ok(returned) = pgo.execute(sql, db, [], dynamic.dynamic)
 
   returned.count
@@ -77,7 +78,8 @@ pub fn inserting_new_rows_and_returning_test() {
   INSERT INTO
     cats
   VALUES
-    (DEFAULT, 'bill', true, ARRAY ['black']), (DEFAULT, 'felix', false, ARRAY ['grey'])
+    (DEFAULT, 'bill', true, ARRAY ['black'], now()),
+    (DEFAULT, 'felix', false, ARRAY ['grey'], now())
   RETURNING
     name"
   let assert Ok(returned) =
@@ -98,7 +100,7 @@ pub fn selecting_rows_test() {
     INSERT INTO
       cats
     VALUES
-      (DEFAULT, 'neo', true, ARRAY ['black'])
+      (DEFAULT, 'neo', true, ARRAY ['black'], '2022-10-10 11:30:30')
     RETURNING
       id"
 
@@ -110,18 +112,24 @@ pub fn selecting_rows_test() {
       "SELECT * FROM cats WHERE id = $1",
       db,
       [pgo.int(id)],
-      dynamic.tuple4(
+      dynamic.tuple5(
         dynamic.int,
         dynamic.string,
         dynamic.bool,
         dynamic.list(dynamic.string),
+        dynamic.tuple2(
+          dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
+          dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
+        ),
       ),
     )
 
   returned.count
   |> should.equal(1)
   returned.rows
-  |> should.equal([#(id, "neo", True, ["black"])])
+  |> should.equal([
+    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30))),
+  ])
 
   pgo.disconnect(db)
 }
@@ -150,7 +158,8 @@ pub fn insert_constraint_error_test() {
     INSERT INTO
       cats
     VALUES
-      (900, 'bill', true, ARRAY ['black']), (900, 'felix', false, ARRAY ['black'])"
+      (900, 'bill', true, ARRAY ['black'], now()),
+      (900, 'felix', false, ARRAY ['black'], now())"
 
   let assert Error(pgo.ConstraintViolated(message, constraint, detail)) =
     pgo.execute(sql, db, [], dynamic.dynamic)
@@ -321,6 +330,20 @@ pub fn array_test() {
   |> assert_roundtrip(["black"], "text[]", pgo.array, decoder)
   |> assert_roundtrip(["gray"], "text[]", pgo.array, decoder)
   |> assert_roundtrip(["gray", "black"], "text[]", pgo.array, decoder)
+  |> pgo.disconnect
+}
+
+pub fn datetime_test() {
+  start_default()
+  |> assert_roundtrip(
+    #(#(2022, 10, 10), #(11, 30, 30)),
+    "timestamp",
+    pgo.timestamp,
+    dynamic.tuple2(
+      dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
+      dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
+    ),
+  )
   |> pgo.disconnect
 }
 
