@@ -117,10 +117,7 @@ pub fn selecting_rows_test() {
         dynamic.string,
         dynamic.bool,
         dynamic.list(dynamic.string),
-        dynamic.tuple2(
-          dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
-          dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
-        ),
+        pgo.decode_timestamp,
       ),
     )
 
@@ -339,10 +336,7 @@ pub fn datetime_test() {
     #(#(2022, 10, 10), #(11, 30, 30)),
     "timestamp",
     pgo.timestamp,
-    dynamic.tuple2(
-      dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
-      dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
-    ),
+    pgo.decode_timestamp,
   )
   |> pgo.disconnect
 }

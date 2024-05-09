@@ -495,3 +495,13 @@ pub fn error_code_name(error_code: String) -> Result(String, Nil) {
     _ -> Error(Nil)
   }
 }
+
+/// Checks to see if the value is formatted as `#(#(Int, Int, Int), #(Int, Int, Int))`
+/// to represent `#(#(year, month, day), #(hour, minute, second))`, and returns the
+/// value if it is.
+pub fn decode_timestamp(value: dynamic.Dynamic) {
+  dynamic.tuple2(
+    dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
+    dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
+  )(value)
+}
