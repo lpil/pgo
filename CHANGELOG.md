@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.0 - 2024-05-11
+
+- Added `array` column handling, accepting a `List` as value.
+
 ## v0.7.0 - 2024-04-05
 
 - The password is now optional in the `url_config` function, defaulting to no
