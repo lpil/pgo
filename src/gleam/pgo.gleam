@@ -7,6 +7,7 @@
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/pgo/ssl
 import gleam/result
 import gleam/string
 import gleam/uri.{Uri}
@@ -26,6 +27,10 @@ pub type Config {
     password: Option(String),
     /// (default: false): Whether to use SSL or not.
     ssl: Bool,
+    /// (default: []): Options to use when SSL is true.
+    /// With OTP 26, SSL is required, and Cacerts is required unless
+    /// VerifyNone is set.
+    ssl_options: List(ssl.Options),
     /// (default: []): List of 2-tuples, where key and value must be binary
     /// strings. You can include any Postgres connection parameter here, such as
     /// `#("application_name", "myappname")` and `#("timezone", "GMT")`.
@@ -71,6 +76,7 @@ pub fn default_config() -> Config {
     user: "postgres",
     password: None,
     ssl: False,
+    ssl_options: [],
     connection_parameters: [],
     pool_size: 1,
     queue_target: 50,
