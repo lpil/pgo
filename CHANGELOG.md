@@ -3,6 +3,7 @@
 ## v0.8.0 - 2024-05-11
 
 - Added `array` column handling, accepting a `List` as value.
+- Added support for `ssl_options` when an SSL connection is setuped.
 
 ## v0.7.0 - 2024-04-05
 
