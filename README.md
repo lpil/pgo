@@ -56,3 +56,15 @@ pub fn main() {
 ```sh
 gleam add gleam_pgo
 ```
+
+## Limitations
+
+Currently, this package should be used to instanciate a bunch of connections,
+and reuse them everywhere. __Do not__ open and close connections dynamically,
+for instance at launch and shutdown of a process. This will expose your
+application to a memory leak, and will lead to undesired runtime crashes.
+
+> Why is that happening? To maintain the PG connection, PGO needs to keep an Erlang atom.
+> Erlang atom are specials, because they're allowed once when using them, and
+> they're never garbaged. When generating dynamically lots of atoms, you expose
+> your application to a memory leak.
