@@ -57,14 +57,11 @@ pub fn main() {
 gleam add gleam_pgo
 ```
 
-## Limitations
+## Atom generation
 
-Currently, this package should be used to instanciate a bunch of connections,
-and reuse them everywhere. __Do not__ open and close connections dynamically,
-for instance at launch and shutdown of a process. This will expose your
-application to a memory leak, and will lead to undesired runtime crashes.
-
-> Why is that happening? To maintain the PG connection, PGO needs to keep an Erlang atom.
-> Erlang atom are specials, because they're allowed once when using them, and
-> they're never garbaged. When generating dynamically lots of atoms, you expose
-> your application to a memory leak.
+Creating a connection pool with the `pgo.connect` function dynamically generates
+an Erlang atom. Atoms are not garbage collected and only a certain number of
+them can exist in an Erlang VM instance, and hitting this limit will result in
+the VM crashing. Due to this limitation you should not dynamically open new
+connection pools, instead create the pools you need when your application starts
+and reuse them throughout the lifetime of your program.
