@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Provided functions for handling timestamp values. The `timestamp` function
+  coerces a `#(#(Int, Int, Int), #(Int, Int, Int))` value representing
+  `#(#(year, month, day), #(hour, minute, second))` into a `Value`. The
+  `decode_timestamp` function can be used to decode a dynamic value returned from
+  the database as a timestamp in the same nested tuple format.
+
+
 ## v0.8.0 - 2024-05-20
 
 - Added `array` column handling, accepting a `List` as value.
