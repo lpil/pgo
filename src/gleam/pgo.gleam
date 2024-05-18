@@ -158,6 +158,7 @@ pub fn text(a: String) -> Value
 @external(erlang, "gleam_pgo_ffi", "coerce")
 pub fn bytea(a: BitArray) -> Value
 
+/// Coerce a timestamp represented as `#(#(year, month, day), #(hour, minute, second))` into a `Value`.
 @external(erlang, "gleam_pgo_ffi", "coerce")
 pub fn array(a: List(a)) -> Value
 
