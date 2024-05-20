@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.9.0 - 2024-05-20
 
 - Provided functions for handling timestamp values. The `timestamp` function
   coerces a `#(#(Int, Int, Int), #(Int, Int, Int))` value representing
