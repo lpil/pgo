@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.0 - 2024-05-11
+## v0.8.0 - 2024-05-20
 
 - Added `array` column handling, accepting a `List` as value.
 
