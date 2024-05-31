@@ -93,8 +93,10 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
       path: path,
       ..,
     ) -> {
-      let assert True = list.contains(["postgres", "postgresql"], scheme)
-      Ok(#(userinfo, host, path, db_port))
+      case list.contains(["postgres", "postgresql"], scheme) {
+        True -> Ok(#(userinfo, host, path, db_port))
+        False -> Error(Nil)
+      }
     }
     _ -> Error(Nil)
   })
