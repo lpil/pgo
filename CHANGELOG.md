@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.10.0 - 2024-05-31
+
+- Fixed the issue where `uri_config` could parse connections string starting with `postgres://`, but not `postgresql://`.
+
 ## v0.9.0 - 2024-05-20
 
 - Provided functions for handling timestamp values. The `timestamp` function
