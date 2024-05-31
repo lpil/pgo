@@ -86,13 +86,16 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
   use uri <- result.then(uri.parse(database_url))
   use #(userinfo, host, path, db_port) <- result.then(case uri {
     Uri(
-      scheme: Some("postgres"),
+      scheme: Some(scheme),
       userinfo: Some(userinfo),
       host: Some(host),
       port: Some(db_port),
       path: path,
       ..,
-    ) -> Ok(#(userinfo, host, path, db_port))
+    ) -> {
+      let assert True = list.contains(["postgres", "postgresql"], scheme)
+      Ok(#(userinfo, host, path, db_port))
+    }
     _ -> Error(Nil)
   })
   use #(user, password) <- result.then(case string.split(userinfo, ":") {
