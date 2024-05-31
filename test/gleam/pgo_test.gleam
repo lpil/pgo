@@ -18,6 +18,20 @@ pub fn url_config_everything_test() {
   ))
 }
 
+pub fn url_config_alternative_postgres_protocol_test() {
+  pgo.url_config("postgresql://u:p@db.test:1234/my_db")
+  |> should.equal(Ok(
+    pgo.Config(
+      ..pgo.default_config(),
+      host: "db.test",
+      port: 1234,
+      database: "my_db",
+      user: "u",
+      password: Some("p"),
+    ),
+  ))
+}
+
 pub fn url_config_not_postgres_protocol_test() {
   pgo.url_config("foo://u:p@db.test:1234/my_db")
   |> should.equal(Error(Nil))
