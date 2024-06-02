@@ -2,7 +2,8 @@
 
 ## v0.10.0 - 2024-05-31
 
-- Fixed the issue where `uri_config` could parse connections string starting with `postgres://`, but not `postgresql://`.
+- The `uri_config` function now accepts the `postgresql://` scheme as well as
+  the `postgres://` scheme.
 
 ## v0.9.0 - 2024-05-20
 

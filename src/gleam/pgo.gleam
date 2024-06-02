@@ -93,9 +93,9 @@ pub fn url_config(database_url: String) -> Result(Config, Nil) {
       path: path,
       ..,
     ) -> {
-      case list.contains(["postgres", "postgresql"], scheme) {
-        True -> Ok(#(userinfo, host, path, db_port))
-        False -> Error(Nil)
+      case scheme {
+        "postgres" | "postgresql" -> Ok(#(userinfo, host, path, db_port))
+        _ -> Error(Nil)
       }
     }
     _ -> Error(Nil)
