@@ -19,7 +19,8 @@ CREATE TABLE cats (
   name VARCHAR(50) NOT NULL,
   is_cute boolean NOT NULL DEFAULT true,
   colors VARCHAR(50)[] NOT NULL,
-  last_petted_at TIMESTAMP NOT NULL
+  last_petted_at TIMESTAMP NOT NULL,
+  birthday DATE NOT NULL
 );
 SQL
 
