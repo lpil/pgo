@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.11.0 - 2024-06-22
 
 - Provided functions for handling date values. The `date` function
   coerces a `#(Int, Int, Int)` value representing `#(year, month, day)` into a
