@@ -73,8 +73,8 @@ pub fn inserting_new_rows_test() {
   INSERT INTO
     cats
   VALUES
-    (DEFAULT, 'bill', true, ARRAY ['black'], now()),
-    (DEFAULT, 'felix', false, ARRAY ['grey'], now())"
+    (DEFAULT, 'bill', true, ARRAY ['black'], now(), '2020-03-04'),
+    (DEFAULT, 'felix', false, ARRAY ['grey'], now(), '2020-03-05')"
   let assert Ok(returned) = pgo.execute(sql, db, [], dynamic.dynamic)
 
   returned.count
@@ -92,8 +92,8 @@ pub fn inserting_new_rows_and_returning_test() {
   INSERT INTO
     cats
   VALUES
-    (DEFAULT, 'bill', true, ARRAY ['black'], now()),
-    (DEFAULT, 'felix', false, ARRAY ['grey'], now())
+    (DEFAULT, 'bill', true, ARRAY ['black'], now(), '2020-03-04'),
+    (DEFAULT, 'felix', false, ARRAY ['grey'], now(), '2020-03-05')
   RETURNING
     name"
   let assert Ok(returned) =
@@ -114,7 +114,7 @@ pub fn selecting_rows_test() {
     INSERT INTO
       cats
     VALUES
-      (DEFAULT, 'neo', true, ARRAY ['black'], '2022-10-10 11:30:30')
+      (DEFAULT, 'neo', true, ARRAY ['black'], '2022-10-10 11:30:30', '2020-03-04')
     RETURNING
       id"
 
@@ -126,12 +126,13 @@ pub fn selecting_rows_test() {
       "SELECT * FROM cats WHERE id = $1",
       db,
       [pgo.int(id)],
-      dynamic.tuple5(
+      dynamic.tuple6(
         dynamic.int,
         dynamic.string,
         dynamic.bool,
         dynamic.list(dynamic.string),
         pgo.decode_timestamp,
+        pgo.decode_date,
       ),
     )
 
@@ -139,7 +140,11 @@ pub fn selecting_rows_test() {
   |> should.equal(1)
   returned.rows
   |> should.equal([
-    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30))),
+    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30)), #(
+      2020,
+      3,
+      4,
+    )),
   ])
 
   pgo.disconnect(db)
@@ -169,8 +174,8 @@ pub fn insert_constraint_error_test() {
     INSERT INTO
       cats
     VALUES
-      (900, 'bill', true, ARRAY ['black'], now()),
-      (900, 'felix', false, ARRAY ['black'], now())"
+      (900, 'bill', true, ARRAY ['black'], now(), '2020-03-04'),
+      (900, 'felix', false, ARRAY ['black'], now(), '2020-03-05')"
 
   let assert Error(pgo.ConstraintViolated(message, constraint, detail)) =
     pgo.execute(sql, db, [], dynamic.dynamic)
@@ -347,11 +352,17 @@ pub fn array_test() {
 pub fn datetime_test() {
   start_default()
   |> assert_roundtrip(
-    #(#(2022, 10, 10), #(11, 30, 30)),
+    #(#(2022, 10, 12), #(11, 30, 33)),
     "timestamp",
     pgo.timestamp,
     pgo.decode_timestamp,
   )
+  |> pgo.disconnect
+}
+
+pub fn date_test() {
+  start_default()
+  |> assert_roundtrip(#(2022, 10, 11), "date", pgo.date, pgo.decode_date)
   |> pgo.disconnect
 }
 

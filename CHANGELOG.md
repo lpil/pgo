@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Provided functions for handling date values. The `date` function
+  coerces a `#(Int, Int, Int)` value representing `#(year, month, day)` into a
+  `Value`. The `decode_date` function can be used to decode a dynamic value
+  returned from the database as a date in the same tuple format.
+
 ## v0.10.0 - 2024-05-31
 
 - The `uri_config` function now accepts the `postgresql://` scheme as well as
@@ -12,7 +19,6 @@
   `#(#(year, month, day), #(hour, minute, second))` into a `Value`. The
   `decode_timestamp` function can be used to decode a dynamic value returned from
   the database as a timestamp in the same nested tuple format.
-
 
 ## v0.8.0 - 2024-05-20
 

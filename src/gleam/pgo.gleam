@@ -170,6 +170,10 @@ pub fn array(a: List(a)) -> Value
 @external(erlang, "gleam_pgo_ffi", "coerce")
 pub fn timestamp(a: #(#(Int, Int, Int), #(Int, Int, Int))) -> Value
 
+/// Coerce a date represented as `#(year, month, day)` into a `Value`.
+@external(erlang, "gleam_pgo_ffi", "coerce")
+pub fn date(a: #(Int, Int, Int)) -> Value
+
 pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   case value {
     Some(term) -> inner_type(term)
@@ -510,4 +514,10 @@ pub fn decode_timestamp(value: dynamic.Dynamic) {
     dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
     dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
   )(value)
+}
+
+/// Checks to see if the value is formatted as `#(Int, Int, Int)` to represent a date
+/// as `#(year, month, day)`, and returns the value if it is.
+pub fn decode_date(value: dynamic.Dynamic) {
+  dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int)(value)
 }
