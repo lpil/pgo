@@ -54,9 +54,9 @@ pub type Config {
 
 /// The internet protocol version to use.
 pub type IpVersion {
-  /// Internet Protocol version 6 (IPv6)
-  Ipv4
   /// Internet Protocol version 4 (IPv4)
+  Ipv4
+  /// Internet Protocol version 6 (IPv6)
   Ipv6
 }
 
