@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.12.0 - Unreleased
+
+- Added the `transaction` function and `TransactionError` type.
+
 ## v0.11.0 - 2024-06-22
 
 - Provided functions for handling date values. The `date` function

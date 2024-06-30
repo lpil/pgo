@@ -2,8 +2,6 @@
 ////
 //// Gleam wrapper around pgo library
 
-// TODO: transactions
-// TODO: JSON support
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -173,6 +171,23 @@ pub fn timestamp(a: #(#(Int, Int, Int), #(Int, Int, Int))) -> Value
 /// Coerce a date represented as `#(year, month, day)` into a `Value`.
 @external(erlang, "gleam_pgo_ffi", "coerce")
 pub fn date(a: #(Int, Int, Int)) -> Value
+
+pub type TransactionError {
+  TransactionQueryError(QueryError)
+  TransactionRolledBack(String)
+}
+
+/// Runs a function within a PostgreSQL transaction.
+///
+/// If the function returns an `Ok` then the transaction is committed.
+///
+/// If the function returns an `Error` or panics then the transaction is rolled
+/// back.
+@external(erlang, "gleam_pgo_ffi", "transaction")
+pub fn transaction(
+  pool: Connection,
+  callback: fn() -> Result(t, String),
+) -> Result(t, TransactionError)
 
 pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   case value {

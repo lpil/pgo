@@ -1,3 +1,4 @@
+import exception
 import gleam/dynamic.{type Decoder}
 import gleam/option.{None, Some}
 import gleam/pgo
@@ -413,6 +414,59 @@ pub fn expected_return_type_test() {
       ]),
     ),
   )
+
+  pgo.disconnect(db)
+}
+
+pub fn transaction_commit_test() {
+  let db = start_default()
+  let id_decoder = dynamic.element(0, dynamic.int)
+  let assert Ok(_) = pgo.execute("truncate table cats", db, [], Ok)
+
+  let insert = fn(name) {
+    let sql = "
+  INSERT INTO
+    cats
+  VALUES
+    (DEFAULT, '" <> name <> "', true, ARRAY ['black'], now(), '2020-03-04')
+  RETURNING id"
+    let assert Ok(pgo.Returned(rows: [id], ..)) =
+      pgo.execute(sql, db, [], id_decoder)
+    id
+  }
+
+  // A succeeding transaction
+  let assert Ok(#(id1, id2)) =
+    pgo.transaction(db, fn() {
+      let id1 = insert("one")
+      let id2 = insert("two")
+      Ok(#(id1, id2))
+    })
+
+  // An error returning transaction, it gets rolled back
+  let assert Error(pgo.TransactionRolledBack("Nah bruv!")) =
+    pgo.transaction(db, fn() {
+      let _id1 = insert("two")
+      let _id2 = insert("three")
+      Error("Nah bruv!")
+    })
+
+  // A crashing transaction, it gets rolled back
+  let _ =
+    exception.rescue(fn() {
+      pgo.transaction(db, fn() {
+        let _id1 = insert("four")
+        let _id2 = insert("five")
+        panic as "testing rollbacks"
+      })
+    })
+
+  let assert Ok(returned) =
+    pgo.execute("select id from cats order by id", db, [], id_decoder)
+
+  let assert [got1, got2] = returned.rows
+  let assert True = id1 == got1
+  let assert True = id2 == got2
 
   pgo.disconnect(db)
 }
