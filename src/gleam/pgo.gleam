@@ -173,11 +173,22 @@ pub fn timestamp(a: #(#(Int, Int, Int), #(Int, Int, Int))) -> Value
 @external(erlang, "gleam_pgo_ffi", "coerce")
 pub fn date(a: #(Int, Int, Int)) -> Value
 
-pub external fn transaction(
+pub type TransactionError {
+  TransactionQueryError(QueryError)
+  TransactionRolledBack(String)
+}
+
+/// Runs a function within a PostgreSQL transaction.
+///
+/// If the function returns an `Ok` then the transaction is committed.
+///
+/// If the function returns an `Error` or panics then the transaction is rolled
+/// back.
+@external(erlang, "gleam_pgo_ffi", "transaction")
+pub fn transaction(
   pool: Connection,
-  fn() -> Result(Returned(t), QueryError),
-) -> Result(Returned(t), QueryError) =
-  "gleam_pgo_ffi" "transaction"
+  callback: fn() -> Result(t, String),
+) -> Result(t, TransactionError)
 
 pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
   case value {
@@ -197,12 +208,6 @@ fn run_query(
   b: String,
   c: List(Value),
 ) -> Result(#(Int, List(Dynamic)), QueryError)
-
-external fn run_query_without_pool(
-  String,
-  List(Value),
-) -> Result(#(Int, List(Dynamic)), QueryError) =
-  "gleam_pgo_ffi" "query_without_pool"
 
 pub type QueryError {
   /// The query failed as a database constraint would have been violated by the
@@ -241,18 +246,6 @@ pub fn execute(
     list.try_map(over: rows, with: decoder)
     |> result.map_error(UnexpectedResultType),
   )
-  Ok(Returned(count, rows))
-}
-
-pub fn inner_execute(
-  query sql: String,
-  with arguments: List(Value),
-  expecting decoder: Decoder(t),
-) -> Result(Returned(t), QueryError) {
-  try #(count, rows) = run_query_without_pool(sql, arguments)
-  try rows =
-    list.try_map(over: rows, with: decoder)
-    |> result.map_error(UnexpectedResultType)
   Ok(Returned(count, rows))
 }
 

@@ -1,3 +1,4 @@
+import exception
 import gleam/dynamic.{type Decoder}
 import gleam/option.{None, Some}
 import gleam/pgo
@@ -419,35 +420,53 @@ pub fn expected_return_type_test() {
 
 pub fn transaction_commit_test() {
   let db = start_default()
+  let id_decoder = dynamic.element(0, dynamic.int)
+  let assert Ok(_) = pgo.execute("truncate table cats", db, [], Ok)
 
-  // Success Commit Case
-  assert Ok(pgo.Returned(count: _, rows: [returned_id])) =
-    pgo.transaction(
-      db,
-      fn() {
-        let sql =
-          "
+  let insert = fn(name) {
+    let sql = "
   INSERT INTO
     cats
   VALUES
-    (default, 'bill', true) returning id"
-        pgo.inner_execute(sql, [], dynamic.element(0, dynamic.int))
-      },
-    )
+    (DEFAULT, '" <> name <> "', true, ARRAY ['black'], now(), '2020-03-04')
+  RETURNING id"
+    let assert Ok(pgo.Returned(rows: [id], ..)) =
+      pgo.execute(sql, db, [], id_decoder)
+    id
+  }
 
-  assert Ok(first_select) =
-    pgo.execute(
-      "select id from cats where id = $1",
-      db,
-      [pgo.int(returned_id)],
-      dynamic.element(0, dynamic.int),
-    )
+  // A succeeding transaction
+  let assert Ok(#(id1, id2)) =
+    pgo.transaction(db, fn() {
+      let id1 = insert("one")
+      let id2 = insert("two")
+      Ok(#(id1, id2))
+    })
 
-  first_select.count
-  |> should.equal(1)
+  // An error returning transaction, it gets rolled back
+  let assert Error(pgo.TransactionRolledBack("Nah bruv!")) =
+    pgo.transaction(db, fn() {
+      let _id1 = insert("two")
+      let _id2 = insert("three")
+      Error("Nah bruv!")
+    })
 
-  first_select.rows
-  |> should.equal([returned_id])
+  // A crashing transaction, it gets rolled back
+  let _ =
+    exception.rescue(fn() {
+      pgo.transaction(db, fn() {
+        let _id1 = insert("four")
+        let _id2 = insert("five")
+        panic as "testing rollbacks"
+      })
+    })
+
+  let assert Ok(returned) =
+    pgo.execute("select id from cats order by id", db, [], id_decoder)
+
+  let assert [got1, got2] = returned.rows
+  let assert True = id1 == got1
+  let assert True = id2 == got2
 
   pgo.disconnect(db)
 }
