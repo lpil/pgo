@@ -1,6 +1,6 @@
 -module(gleam_pgo_ffi).
 
--export([query/3, query_without_pool/2, connect/1, disconnect/1, coerce/1, null/0, transaction/2]).
+-export([query/3, connect/1, disconnect/1, coerce/1, null/0, transaction/2]).
 
 -record(pgo_pool, {name, pid}).
 
@@ -59,17 +59,20 @@ disconnect(#pgo_pool{pid = Pid}) ->
     erlang:exit(Pid, normal),
     nil.
 
-transaction(#pgo_pool{name = Name}, Func) ->
-    pgo:transaction(Name, Func, #{}).
-
-query_without_pool(Sql, Arguments) ->
-    case pgo:query(Sql, Arguments) of
-        #{rows := Rows, num_rows := NumRows} ->
-            {ok, {NumRows, Rows}};
-
-        {error, Error} ->
-            {error, convert_error(Error)}
+transaction(#pgo_pool{name = Name}, Callback) ->
+    F = fun() ->
+        case Callback() of
+            {ok, T} -> {ok, T};
+            {error, Reason} -> error({gleam_pgo_rollback_transaction, Reason})
+        end
+    end,
+    try
+        pgo:transaction(Name, F, #{})
+    catch
+        error:{gleam_pgo_rollback_transaction, Reason} ->
+            {error, {transaction_rolled_back, Reason}}
     end.
+  
 
 query(#pgo_pool{name = Name}, Sql, Arguments) ->
     case pgo:query(Sql, Arguments, #{pool => Name}) of
