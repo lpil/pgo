@@ -2,7 +2,6 @@
 ////
 //// Gleam wrapper around pgo library
 
-// TODO: JSON support
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
 import gleam/list
 import gleam/option.{type Option, None, Some}
