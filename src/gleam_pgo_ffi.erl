@@ -59,9 +59,9 @@ disconnect(#pgo_pool{pid = Pid}) ->
     erlang:exit(Pid, normal),
     nil.
 
-transaction(#pgo_pool{name = Name}, Callback) ->
+transaction(#pgo_pool{name = Name} = Conn, Callback) ->
     F = fun() ->
-        case Callback() of
+        case Callback(Conn) of
             {ok, T} -> {ok, T};
             {error, Reason} -> error({gleam_pgo_rollback_transaction, Reason})
         end

@@ -423,7 +423,7 @@ pub fn transaction_commit_test() {
   let id_decoder = dynamic.element(0, dynamic.int)
   let assert Ok(_) = pgo.execute("truncate table cats", db, [], Ok)
 
-  let insert = fn(name) {
+  let insert = fn(db, name) {
     let sql = "
   INSERT INTO
     cats
@@ -437,26 +437,26 @@ pub fn transaction_commit_test() {
 
   // A succeeding transaction
   let assert Ok(#(id1, id2)) =
-    pgo.transaction(db, fn() {
-      let id1 = insert("one")
-      let id2 = insert("two")
+    pgo.transaction(db, fn(db) {
+      let id1 = insert(db, "one")
+      let id2 = insert(db, "two")
       Ok(#(id1, id2))
     })
 
   // An error returning transaction, it gets rolled back
   let assert Error(pgo.TransactionRolledBack("Nah bruv!")) =
-    pgo.transaction(db, fn() {
-      let _id1 = insert("two")
-      let _id2 = insert("three")
+    pgo.transaction(db, fn(db) {
+      let _id1 = insert(db, "two")
+      let _id2 = insert(db, "three")
       Error("Nah bruv!")
     })
 
   // A crashing transaction, it gets rolled back
   let _ =
     exception.rescue(fn() {
-      pgo.transaction(db, fn() {
-        let _id1 = insert("four")
-        let _id2 = insert("five")
+      pgo.transaction(db, fn(db) {
+        let _id1 = insert(db, "four")
+        let _id2 = insert(db, "five")
         panic as "testing rollbacks"
       })
     })
