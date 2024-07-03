@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.12.0 - Unreleased
+## v0.12.0 - 2024-07-03
 
 - Added the `transaction` function and `TransactionError` type.
 
