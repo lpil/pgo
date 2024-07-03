@@ -186,7 +186,7 @@ pub type TransactionError {
 @external(erlang, "gleam_pgo_ffi", "transaction")
 pub fn transaction(
   pool: Connection,
-  callback: fn() -> Result(t, String),
+  callback: fn(Connection) -> Result(t, String),
 ) -> Result(t, TransactionError)
 
 pub fn nullable(inner_type: fn(a) -> Value, value: Option(a)) -> Value {
