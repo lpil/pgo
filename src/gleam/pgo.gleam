@@ -3,6 +3,7 @@
 //// Gleam wrapper around pgo library
 
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
+import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
@@ -226,6 +227,22 @@ pub type QueryError {
   /// No connection was available to execute the query. This may be due to
   /// invalid connection details such as an invalid username or password.
   ConnectionUnavailable
+}
+
+pub fn query_error_to_string(error: QueryError) -> String {
+  case error {
+    ConstraintViolated(message, _constraint, _detail) -> message
+    PostgresqlError(_code, _name, message) -> message
+    UnexpectedArgumentCount(expected, got) ->
+      "Unexpected argument count, expected "
+      <> int.to_string(expected)
+      <> " but got "
+      <> int.to_string(got)
+    UnexpectedArgumentType(expected, got) ->
+      "Unexpected argument type, expected " <> expected <> " but got " <> got
+    UnexpectedResultType(_errors) -> "Failed to decode"
+    ConnectionUnavailable -> "Connection unavailable"
+  }
 }
 
 /// Run a query against a PostgreSQL database.
