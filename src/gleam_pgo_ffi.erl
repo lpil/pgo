@@ -13,6 +13,30 @@ null() ->
 coerce(Value) ->
     Value.
 
+%% Use correct defaults for SSL connections when SSL is enabled.
+%% Peers have to be verified & cacerts are fetched directly from the system.
+%%
+%% `server_name_indication` should be set to the value of the Host, because the
+%% connection to Postgres uses a TCP connection that get upgraded to TLS, and
+%% the TLS socket is sent as is, meaning the Hostname is lost when ssl module
+%% get the socket. server_name_indication overrides that behaviour and send
+%% the correct Hostname to the ssl module.
+%% `customize_hostname_check` should be set to with the verify hostname match
+%% with HTTPS, because otherwise wildcards certificaties (i.e. *.example.com)
+%% will not be handled correctly.
+default_ssl_options(Host, Ssl) ->
+  case Ssl of
+    false -> [];
+    true -> [
+      {verify, verify_peer},
+      {cacerts, public_key:cacerts_get()},
+      {server_name_indication, binary_to_list(Host)},
+      {customize_hostname_check, [
+        {match_fun, public_key:pkix_verify_hostname_match_fun(https)}
+      ]}
+    ]
+  end.
+
 connect(Config) ->
     Id = integer_to_list(erlang:unique_integer([positive])),
     PoolName = list_to_atom("gleam_pgo_pool_" ++ Id),
@@ -31,12 +55,14 @@ connect(Config) ->
         trace = Trace,
         ip_version = IpVersion
     } = Config,
+    SslOptions = default_ssl_options(Host, Ssl),
     Options1 = #{
         host => Host,
         port => Port,
         database => Database,
         user => User,
         ssl => Ssl,
+        ssl_options => SslOptions,
         connection_parameters => ConnectionParameters,
         pool_size => PoolSize,
         queue_target => QueueTarget,
