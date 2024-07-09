@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.13.0 - 2024-07-09
+
+- Fix the SSL options with correct default when SSL is enabled.
+
 ## v0.12.0 - 2024-07-03
 
 - Added the `transaction` function and `TransactionError` type.
