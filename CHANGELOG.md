@@ -1,8 +1,8 @@
 # Changelog
 
-## v0.13.0 - 2024-07-09
+## v0.13.0 - 2024-07-17
 
-- Fix the SSL options with correct default when SSL is enabled.
+- Host CA certs are now used to verify SSL by default.
 
 ## v0.12.0 - 2024-07-03
 
