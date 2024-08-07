@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.14.0 - 2024-08-07
+
+- Add ability to return rows as maps instead of tuple.
+
 ## v0.13.0 - 2024-07-17
 
 - Host CA certs are now used to verify SSL by default.

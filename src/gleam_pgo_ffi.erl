@@ -53,7 +53,8 @@ connect(Config) ->
         queue_interval = QueueInterval,
         idle_interval = IdleInterval,
         trace = Trace,
-        ip_version = IpVersion
+        ip_version = IpVersion,
+        rows_as_map = RowsAsMap
     } = Config,
     SslOptions = default_ssl_options(Host, Ssl),
     Options1 = #{
@@ -69,6 +70,7 @@ connect(Config) ->
         queue_interval => QueueInterval,
         idle_interval => IdleInterval,
         trace => Trace,
+        decode_opts => [{return_rows_as_maps, RowsAsMap}],
         socket_options => case IpVersion of
             ipv4 -> [];
             ipv6 -> [inet6]
@@ -98,7 +100,7 @@ transaction(#pgo_pool{name = Name} = Conn, Callback) ->
         error:{gleam_pgo_rollback_transaction, Reason} ->
             {error, {transaction_rolled_back, Reason}}
     end.
-  
+
 
 query(#pgo_pool{name = Name}, Sql, Arguments) ->
     case pgo:query(Sql, Arguments, #{pool => Name}) of
@@ -114,8 +116,8 @@ convert_error(none_available) ->
 convert_error({pgo_protocol, {parameters, Expected, Got}}) ->
     {unexpected_argument_count, Expected, Got};
 convert_error({pgsql_error, #{
-    message := Message, 
-    constraint := Constraint, 
+    message := Message,
+    constraint := Constraint,
     detail := Detail
 }}) ->
     {constraint_violated, Message, Constraint, Detail};

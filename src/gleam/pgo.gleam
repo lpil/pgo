@@ -47,6 +47,9 @@ pub type Config {
     trace: Bool,
     /// Which internet protocol to use for this connection
     ip_version: IpVersion,
+    /// By default, PGO will return a n-tuple, in the order of the query.
+    /// By setting `rows_as_map` to `True`, the result will be `Dict`.
+    rows_as_map: Bool,
   )
 }
 
@@ -76,6 +79,7 @@ pub fn default_config() -> Config {
     idle_interval: 1000,
     trace: False,
     ip_version: Ipv4,
+    rows_as_map: False,
   )
 }
 
