@@ -67,6 +67,15 @@ fn start_default() {
   |> pgo.connect
 }
 
+fn default_config() {
+  pgo.Config(
+    ..pgo.default_config(),
+    database: "gleam_pgo_test",
+    password: Some("postgres"),
+    pool_size: 1,
+  )
+}
+
 pub fn inserting_new_rows_test() {
   let db = start_default()
   let sql =
@@ -414,6 +423,53 @@ pub fn expected_return_type_test() {
       ]),
     ),
   )
+
+  pgo.disconnect(db)
+}
+
+pub fn expected_maps_test() {
+  let db = pgo.Config(..default_config(), rows_as_map: True) |> pgo.connect
+
+  let sql =
+    "
+    INSERT INTO
+      cats
+    VALUES
+      (DEFAULT, 'neo', true, ARRAY ['black'], '2022-10-10 11:30:30', '2020-03-04')
+    RETURNING
+      id"
+
+  let assert Ok(pgo.Returned(rows: [id], ..)) =
+    pgo.execute(sql, db, [], dynamic.field("id", dynamic.int))
+
+  let assert Ok(returned) =
+    pgo.execute(
+      "SELECT * FROM cats WHERE id = $1",
+      db,
+      [pgo.int(id)],
+      dynamic.decode6(
+        fn(id, name, is_cute, colors, last_petted_at, birthday) {
+          #(id, name, is_cute, colors, last_petted_at, birthday)
+        },
+        dynamic.field("id", dynamic.int),
+        dynamic.field("name", dynamic.string),
+        dynamic.field("is_cute", dynamic.bool),
+        dynamic.field("colors", dynamic.list(dynamic.string)),
+        dynamic.field("last_petted_at", pgo.decode_timestamp),
+        dynamic.field("birthday", pgo.decode_date),
+      ),
+    )
+
+  returned.count
+  |> should.equal(1)
+  returned.rows
+  |> should.equal([
+    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30)), #(
+      2020,
+      3,
+      4,
+    )),
+  ])
 
   pgo.disconnect(db)
 }
