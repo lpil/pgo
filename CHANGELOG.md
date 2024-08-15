@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.14.0 - 2024-08-07
+## v0.14.0 - 2024-08-15
 
 - Add ability to return rows as maps instead of tuple.
 
