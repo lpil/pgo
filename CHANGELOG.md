@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.15.0 - Unreleased
+
+- Fix a bug where timestamps are returned as `#(#(Int, Int, Int), #(Int, Int, Float))`
+  leading `decode_timestamp` to fail.
+
 ## v0.14.0 - 2024-08-15
 
 - Add ability to return rows as maps instead of tuple.
