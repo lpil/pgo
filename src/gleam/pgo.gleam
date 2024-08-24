@@ -22,7 +22,7 @@ pub type Config {
     user: String,
     /// Password for the user.
     password: Option(String),
-    /// (default: false): Whether to use SSL or not.
+    /// (default: False): Whether to use SSL or not.
     ssl: Bool,
     /// (default: []): List of 2-tuples, where key and value must be binary
     /// strings. You can include any Postgres connection parameter here, such as
@@ -40,14 +40,14 @@ pub type Config {
     /// (default: 1000): The database is pinged every idle_interval when the
     /// connection is idle.
     idle_interval: Int,
-    /// trace (default: false): pgo is instrumented with [OpenCensus][1] and
+    /// trace (default: False): pgo is instrumented with [OpenCensus][1] and
     /// when this option is true a span will be created (if sampled).
     ///
     /// [1]: https://opencensus.io/
     trace: Bool,
-    /// Which internet protocol to use for this connection
+    /// (default: Ipv4) Which internet protocol to use for this connection
     ip_version: IpVersion,
-    /// By default, PGO will return a n-tuple, in the order of the query.
+    /// (default: False) By default, PGO will return a n-tuple, in the order of the query.
     /// By setting `rows_as_map` to `True`, the result will be `Dict`.
     rows_as_map: Bool,
   )
