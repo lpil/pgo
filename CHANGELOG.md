@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.15.0 - Unreleased
+
+- Add support for `sslmode` in connection strings.
+- Change SSL from `Bool` to `SslEnabled`, `SslDisabled` and `SslVerify` to match
+  against diverse CA certificates or not.
+
 ## v0.14.0 - 2024-08-15
 
 - Add ability to return rows as maps instead of tuple.

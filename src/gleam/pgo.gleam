@@ -22,8 +22,8 @@ pub type Config {
     user: String,
     /// Password for the user.
     password: Option(String),
-    /// (default: false): Whether to use SSL or not.
-    ssl: Bool,
+    /// (default: SslDisabled): Whether to use SSL or not.
+    ssl: SSL,
     /// (default: []): List of 2-tuples, where key and value must be binary
     /// strings. You can include any Postgres connection parameter here, such as
     /// `#("application_name", "myappname")` and `#("timezone", "GMT")`.
@@ -53,6 +53,16 @@ pub type Config {
   )
 }
 
+/// The SSL target you need.
+pub type SSL {
+  /// Enable SSL connection, but don't check CA certificate.
+  SslEnabled
+  /// Enable SSL connection, and check CA certificate.
+  SslVerify
+  /// Disable SSL connection.
+  SslDisabled
+}
+
 /// The internet protocol version to use.
 pub type IpVersion {
   /// Internet Protocol version 4 (IPv4)
@@ -71,7 +81,7 @@ pub fn default_config() -> Config {
     database: "postgres",
     user: "postgres",
     password: None,
-    ssl: False,
+    ssl: SslDisabled,
     connection_parameters: [],
     pool_size: 1,
     queue_target: 50,
@@ -86,40 +96,67 @@ pub fn default_config() -> Config {
 /// Parse a database url into configuration that can be used to start a pool.
 pub fn url_config(database_url: String) -> Result(Config, Nil) {
   use uri <- result.then(uri.parse(database_url))
-  use #(userinfo, host, path, db_port) <- result.then(case uri {
+  use #(userinfo, host, path, port, query) <- result.then(case uri {
     Uri(
       scheme: Some(scheme),
       userinfo: Some(userinfo),
       host: Some(host),
-      port: Some(db_port),
-      path: path,
+      port: Some(port),
+      path:,
+      query:,
       ..,
     ) -> {
       case scheme {
-        "postgres" | "postgresql" -> Ok(#(userinfo, host, path, db_port))
+        "postgres" | "postgresql" -> Ok(#(userinfo, host, path, port, query))
         _ -> Error(Nil)
       }
     }
     _ -> Error(Nil)
   })
-  use #(user, password) <- result.then(case string.split(userinfo, ":") {
-    [user] -> Ok(#(user, None))
-    [user, password] -> Ok(#(user, Some(password)))
-    _ -> Error(Nil)
-  })
+  use #(user, password) <- result.then(extract_user_password(userinfo))
+  use ssl <- result.then(extract_ssl_mode(query))
   case string.split(path, "/") {
     ["", database] ->
       Ok(
         Config(
           ..default_config(),
-          host: host,
-          port: db_port,
-          database: database,
-          user: user,
-          password: password,
+          host:,
+          port:,
+          database:,
+          user:,
+          password:,
+          ssl:,
         ),
       )
     _ -> Error(Nil)
+  }
+}
+
+/// Expects `userinfo` as `"username"` or `"username:password"`. Fails otherwise.
+fn extract_user_password(userinfo: String) {
+  case string.split(userinfo, ":") {
+    [user] -> Ok(#(user, None))
+    [user, password] -> Ok(#(user, Some(password)))
+    _ -> Error(Nil)
+  }
+}
+
+/// Expects `sslmode` to be `require`, `verify-ca`, `verify-full` or `disable`.
+/// If `sslmode` is set, but not one of those value, fails.
+/// If `sslmode` is unset, returns `SslDisabled`.
+fn extract_ssl_mode(query: option.Option(String)) {
+  case query {
+    option.None -> Ok(SslDisabled)
+    option.Some(query) -> {
+      use query <- result.then(uri.parse_query(query))
+      use sslmode <- result.then(list.key_find(query, "sslmode"))
+      case sslmode {
+        "require" -> Ok(SslEnabled)
+        "verify-ca" | "verify-full" -> Ok(SslVerify)
+        "disable" -> Ok(SslDisabled)
+        _ -> Error(Nil)
+      }
+    }
   }
 }
 
