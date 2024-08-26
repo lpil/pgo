@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.15.0 - Unreleased
+
+- Ensure `ssl` and `pgo` are running before using `gleam_pgo`.
+
 ## v0.14.0 - 2024-08-15
 
 - Add ability to return rows as maps instead of tuple.
