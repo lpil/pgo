@@ -3,6 +3,7 @@
 //// Gleam wrapper around pgo library
 
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
+import gleam/float
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
@@ -531,8 +532,16 @@ pub fn error_code_name(error_code: String) -> Result(String, Nil) {
 pub fn decode_timestamp(value: dynamic.Dynamic) {
   dynamic.tuple2(
     dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
-    dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
+    dynamic.tuple3(dynamic.int, dynamic.int, decode_seconds),
   )(value)
+}
+
+fn decode_rounded_int(value: dynamic.Dynamic) {
+  dynamic.float(value) |> result.map(float.round)
+}
+
+fn decode_seconds(value: dynamic.Dynamic) {
+  dynamic.any([dynamic.int, decode_rounded_int])(value)
 }
 
 /// Checks to see if the value is formatted as `#(Int, Int, Int)` to represent a date

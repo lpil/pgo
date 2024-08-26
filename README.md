@@ -57,6 +57,16 @@ pub fn main() {
 gleam add gleam_pgo
 ```
 
+## About timestamps
+
+If you're used to manage timestamps in Postgres, you know timestamp are stored
+as bytes, and clients transforms them in their desired formats. `pgo` uses the
+Erlang datetime convention, i.e. managing a timestamp as a tuple
+`#(#(year, month, day), #(hour, minutes, seconds))`. When querying a timestamp,
+unless you're casting it (in ISO-8601 for example) voluntarily in your SQL query,
+`pgo` will give you such a tuple. You're expected to decode it using
+`pgo.decode_timestamp` that will do the work of decoding it for you.
+
 ## Atom generation
 
 Creating a connection pool with the `pgo.connect` function dynamically generates
