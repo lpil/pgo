@@ -526,3 +526,8 @@ pub fn transaction_commit_test() {
 
   pgo.disconnect(db)
 }
+
+pub fn query_error_to_string_test() {
+  pgo.query_error_to_string(pgo.UnexpectedArgumentCount(2, 1))
+  |> should.equal("Unexpected argument count, expected 2 but got 1")
+}
