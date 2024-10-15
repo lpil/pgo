@@ -3,6 +3,9 @@
 ## v0.15.0 - Unreleased
 
 - Ensure `ssl` and `pgo` are running before using `gleam_pgo`.
+- Fix a bug where timestamps are returned as `#(#(Int, Int, Int), #(Int, Int, Float))`
+  leading `decode_timestamp` to fail. `decode_timestamp` now properly returns
+  `#(#(Int, Int, Int), #(Int, Int, Float))`.
 
 ## v0.14.0 - 2024-08-15
 

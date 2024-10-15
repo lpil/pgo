@@ -150,7 +150,7 @@ pub fn selecting_rows_test() {
   |> should.equal(1)
   returned.rows
   |> should.equal([
-    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30)), #(
+    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30.0)), #(
       2020,
       3,
       4,
@@ -362,7 +362,7 @@ pub fn array_test() {
 pub fn datetime_test() {
   start_default()
   |> assert_roundtrip(
-    #(#(2022, 10, 12), #(11, 30, 33)),
+    #(#(2022, 10, 12), #(11, 30, 33.0)),
     "timestamp",
     pgo.timestamp,
     pgo.decode_timestamp,
@@ -464,7 +464,7 @@ pub fn expected_maps_test() {
   |> should.equal(1)
   returned.rows
   |> should.equal([
-    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30)), #(
+    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30.0)), #(
       2020,
       3,
       4,
