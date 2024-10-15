@@ -3,7 +3,7 @@
 //// Gleam wrapper around pgo library
 
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
-import gleam/float
+import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
@@ -171,7 +171,7 @@ pub fn array(a: List(a)) -> Value
 
 /// Coerce a timestamp represented as `#(#(year, month, day), #(hour, minute, second))` into a `Value`.
 @external(erlang, "gleam_pgo_ffi", "coerce")
-pub fn timestamp(a: #(#(Int, Int, Int), #(Int, Int, Int))) -> Value
+pub fn timestamp(a: #(#(Int, Int, Int), #(Int, Int, Float))) -> Value
 
 /// Coerce a date represented as `#(year, month, day)` into a `Value`.
 @external(erlang, "gleam_pgo_ffi", "coerce")
@@ -526,8 +526,8 @@ pub fn error_code_name(error_code: String) -> Result(String, Nil) {
   }
 }
 
-/// Checks to see if the value is formatted as `#(#(Int, Int, Int), #(Int, Int, Int))`
-/// to represent `#(#(year, month, day), #(hour, minute, second))`, and returns the
+/// Checks to see if the value is formatted as `#(#(Int, Int, Int), #(Int, Int, Float))`
+/// to represent `#(#(year, month, day), #(hour, minute, second.milliseconds))`, and returns the
 /// value if it is.
 pub fn decode_timestamp(value: dynamic.Dynamic) {
   dynamic.tuple2(
@@ -536,12 +536,12 @@ pub fn decode_timestamp(value: dynamic.Dynamic) {
   )(value)
 }
 
-fn decode_rounded_int(value: dynamic.Dynamic) {
-  dynamic.float(value) |> result.map(float.round)
+fn decode_int_to_float(value: dynamic.Dynamic) {
+  dynamic.int(value) |> result.map(int.to_float)
 }
 
 fn decode_seconds(value: dynamic.Dynamic) {
-  dynamic.any([dynamic.int, decode_rounded_int])(value)
+  dynamic.any([dynamic.float, decode_int_to_float])(value)
 }
 
 /// Checks to see if the value is formatted as `#(Int, Int, Int)` to represent a date
