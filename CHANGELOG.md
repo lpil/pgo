@@ -5,6 +5,7 @@
 - Renamed to `pog`.
 - Configuration and query API redesigned.
 - Introduced the `Date`, `Time`, and `Timestamp` types.
+- The default connection pool size is now 10.
 
 ## v0.15.0 - Unreleased
 
