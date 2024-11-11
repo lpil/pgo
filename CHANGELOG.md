@@ -4,6 +4,7 @@
 
 - Renamed to `pog`.
 - Configuration and query API redesigned.
+- Introduced the `Date`, `Time`, and `Timestamp` types.
 
 ## v0.15.0 - Unreleased
 
