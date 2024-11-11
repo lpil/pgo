@@ -336,6 +336,34 @@ pub type QueryError {
   ConnectionUnavailable
 }
 
+pub opaque type Query(row_type) {
+  Query(sql: String, parameters: List(Value), row_decoder: Decoder(row_type))
+}
+
+/// Create a new query to use with the `execute`, `returning`, and `parameter`
+/// functions.
+///
+pub fn query(sql: String) -> Query(Nil) {
+  Query(sql:, parameters: [], row_decoder: fn(_) { Ok(Nil) })
+}
+
+/// Set the decoder to use for the type of row returned by executing this
+/// query.
+///
+/// If the decoder is unable to decode the row value then the query will return
+/// an error from the `exec` function, but the query will still have been run
+/// against the database.
+///
+pub fn returning(query: Query(t1), decoder: Decoder(t2)) -> Query(t2) {
+  let Query(sql:, parameters:, row_decoder: _) = query
+  Query(sql:, parameters:, row_decoder: decoder)
+}
+
+/// Push a new query parameter value for the query.
+pub fn parameter(query: Query(t1), parameter: Value) -> Query(t1) {
+  Query(..query, parameters: [parameter, ..query.parameters])
+}
+
 /// Run a query against a PostgreSQL database.
 ///
 /// The provided dynamic decoder is used to decode the rows returned by
@@ -343,14 +371,13 @@ pub type QueryError {
 /// use the `dynamic.dynamic` decoder.
 ///
 pub fn execute(
-  query sql: String,
+  query query: Query(t),
   on pool: Connection,
-  with arguments: List(Value),
-  expecting decoder: Decoder(t),
 ) -> Result(Returned(t), QueryError) {
-  use #(count, rows) <- result.then(run_query(pool, sql, arguments))
+  let parameters = list.reverse(query.parameters)
+  use #(count, rows) <- result.then(run_query(pool, query.sql, parameters))
   use rows <- result.then(
-    list.try_map(over: rows, with: decoder)
+    list.try_map(over: rows, with: query.row_decoder)
     |> result.map_error(UnexpectedResultType),
   )
   Ok(Returned(count, rows))
