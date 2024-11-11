@@ -11,31 +11,28 @@ pub fn main() {
 }
 
 pub fn url_config_everything_test() {
+  let expected =
+    pog.default_config()
+    |> pog.host("db.test")
+    |> pog.port(1234)
+    |> pog.database("my_db")
+    |> pog.user("u")
+    |> pog.password(Some("p"))
+
   pog.url_config("postgres://u:p@db.test:1234/my_db")
-  |> should.equal(Ok(
-    pog.Config(
-      ..pog.default_config(),
-      host: "db.test",
-      port: 1234,
-      database: "my_db",
-      user: "u",
-      password: Some("p"),
-    ),
-  ))
+  |> should.equal(Ok(expected))
 }
 
 pub fn url_config_alternative_postgres_protocol_test() {
+  let expected =
+    pog.default_config()
+    |> pog.host("db.test")
+    |> pog.port(1234)
+    |> pog.database("my_db")
+    |> pog.user("u")
+    |> pog.password(Some("p"))
   pog.url_config("postgresql://u:p@db.test:1234/my_db")
-  |> should.equal(Ok(
-    pog.Config(
-      ..pog.default_config(),
-      host: "db.test",
-      port: 1234,
-      database: "my_db",
-      user: "u",
-      password: Some("p"),
-    ),
-  ))
+  |> should.equal(Ok(expected))
 }
 
 pub fn url_config_not_postgres_protocol_test() {
@@ -44,17 +41,15 @@ pub fn url_config_not_postgres_protocol_test() {
 }
 
 pub fn url_config_no_password_test() {
+  let expected =
+    pog.default_config()
+    |> pog.host("db.test")
+    |> pog.port(1234)
+    |> pog.database("my_db")
+    |> pog.user("u")
+    |> pog.password(None)
   pog.url_config("postgres://u@db.test:1234/my_db")
-  |> should.equal(Ok(
-    pog.Config(
-      ..pog.default_config(),
-      host: "db.test",
-      port: 1234,
-      database: "my_db",
-      user: "u",
-      password: None,
-    ),
-  ))
+  |> should.equal(Ok(expected))
 }
 
 pub fn url_config_path_slash_test() {
