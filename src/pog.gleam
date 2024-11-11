@@ -2,7 +2,11 @@
 ////
 //// Gleam wrapper around pgo library
 
+// TODO: add time and timestamp with zone once PGO supports them
+
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
+import gleam/float
+import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/result
@@ -272,13 +276,22 @@ pub fn bytea(a: BitArray) -> Value
 @external(erlang, "pog_ffi", "coerce")
 pub fn array(a: List(a)) -> Value
 
-/// Coerce a timestamp represented as `#(#(year, month, day), #(hour, minute, second))` into a `Value`.
-@external(erlang, "pog_ffi", "coerce")
-pub fn timestamp(a: #(#(Int, Int, Int), #(Int, Int, Int))) -> Value
+pub fn timestamp(timestamp: Timestamp) -> Value {
+  coerce_value(#(date(timestamp.date), time(timestamp.time)))
+}
 
-/// Coerce a date represented as `#(year, month, day)` into a `Value`.
+pub fn date(date: Date) -> Value {
+  coerce_value(#(date.year, date.month, date.day))
+}
+
+pub fn time(time: Time) -> Value {
+  let seconds = int.to_float(time.seconds)
+  let seconds = seconds +. int.to_float(time.microseconds) /. 1_000_000.0
+  coerce_value(#(time.hours, time.minutes, seconds))
+}
+
 @external(erlang, "pog_ffi", "coerce")
-pub fn date(a: #(Int, Int, Int)) -> Value
+fn coerce_value(a: anything) -> Value
 
 pub type TransactionError {
   TransactionQueryError(QueryError)
@@ -656,18 +669,57 @@ pub fn error_code_name(error_code: String) -> Result(String, Nil) {
   }
 }
 
-/// Checks to see if the value is formatted as `#(#(Int, Int, Int), #(Int, Int, Int))`
-/// to represent `#(#(year, month, day), #(hour, minute, second))`, and returns the
-/// value if it is.
-pub fn decode_timestamp(value: dynamic.Dynamic) {
-  dynamic.tuple2(
-    dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
-    dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int),
+pub fn decode_timestamp(
+  value: dynamic.Dynamic,
+) -> Result(Timestamp, DecodeErrors) {
+  dynamic.decode2(
+    Timestamp,
+    dynamic.element(0, decode_date),
+    dynamic.element(1, decode_time),
   )(value)
 }
 
-/// Checks to see if the value is formatted as `#(Int, Int, Int)` to represent a date
-/// as `#(year, month, day)`, and returns the value if it is.
-pub fn decode_date(value: dynamic.Dynamic) {
-  dynamic.tuple3(dynamic.int, dynamic.int, dynamic.int)(value)
+pub fn decode_date(value: dynamic.Dynamic) -> Result(Date, DecodeErrors) {
+  dynamic.decode3(
+    Date,
+    dynamic.element(0, dynamic.int),
+    dynamic.element(1, dynamic.int),
+    dynamic.element(2, dynamic.int),
+  )(value)
+}
+
+pub fn decode_time(value: dynamic.Dynamic) -> Result(Time, DecodeErrors) {
+  case dynamic.tuple3(dynamic.int, dynamic.int, decode_seconds)(value) {
+    Error(e) -> Error(e)
+    Ok(#(hours, minutes, #(seconds, microseconds))) ->
+      Ok(Time(hours:, minutes:, seconds:, microseconds:))
+  }
+}
+
+fn decode_seconds(value: dynamic.Dynamic) -> Result(#(Int, Int), DecodeErrors) {
+  case dynamic.int(value) {
+    Ok(i) -> Ok(#(i, 0))
+    Error(_) ->
+      case dynamic.float(value) {
+        Error(e) -> Error(e)
+        Ok(i) -> {
+          let floored = float.floor(i)
+          let seconds = float.round(floored)
+          let microseconds = float.round({ i -. floored } *. 1_000_000.0)
+          Ok(#(seconds, microseconds))
+        }
+      }
+  }
+}
+
+pub type Date {
+  Date(year: Int, month: Int, day: Int)
+}
+
+pub type Time {
+  Time(hours: Int, minutes: Int, seconds: Int, microseconds: Int)
+}
+
+pub type Timestamp {
+  Timestamp(date: Date, time: Time)
 }

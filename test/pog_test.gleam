@@ -125,7 +125,7 @@ pub fn selecting_rows_test() {
     INSERT INTO
       cats
     VALUES
-      (DEFAULT, 'neo', true, ARRAY ['black'], '2022-10-10 11:30:30', '2020-03-04')
+      (DEFAULT, 'neo', true, ARRAY ['black'], '2022-10-10 11:30:30.1', '2020-03-04')
     RETURNING
       id"
 
@@ -151,11 +151,14 @@ pub fn selecting_rows_test() {
   |> should.equal(1)
   returned.rows
   |> should.equal([
-    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30)), #(
-      2020,
-      3,
-      4,
-    )),
+    #(
+      id,
+      "neo",
+      True,
+      ["black"],
+      pog.Timestamp(pog.Date(2022, 10, 10), pog.Time(11, 30, 30, 100_000)),
+      pog.Date(2020, 3, 4),
+    ),
   ])
 
   pog.disconnect(db)
@@ -361,7 +364,7 @@ pub fn array_test() {
 pub fn datetime_test() {
   start_default()
   |> assert_roundtrip(
-    #(#(2022, 10, 12), #(11, 30, 33)),
+    pog.Timestamp(pog.Date(2022, 10, 12), pog.Time(11, 30, 33, 101)),
     "timestamp",
     pog.timestamp,
     pog.decode_timestamp,
@@ -371,7 +374,7 @@ pub fn datetime_test() {
 
 pub fn date_test() {
   start_default()
-  |> assert_roundtrip(#(2022, 10, 11), "date", pog.date, pog.decode_date)
+  |> assert_roundtrip(pog.Date(2022, 10, 11), "date", pog.date, pog.decode_date)
   |> pog.disconnect
 }
 
@@ -469,11 +472,14 @@ pub fn expected_maps_test() {
   |> should.equal(1)
   returned.rows
   |> should.equal([
-    #(id, "neo", True, ["black"], #(#(2022, 10, 10), #(11, 30, 30)), #(
-      2020,
-      3,
-      4,
-    )),
+    #(
+      id,
+      "neo",
+      True,
+      ["black"],
+      pog.Timestamp(pog.Date(2022, 10, 10), pog.Time(11, 30, 30, 0)),
+      pog.Date(2020, 3, 4),
+    ),
   ])
 
   pog.disconnect(db)
