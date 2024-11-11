@@ -136,44 +136,44 @@ pub type Connection
 /// PostgreSQL instance specified in the config. If the configuration is invalid
 /// or it cannot connect for another reason it will continue to attempt to
 /// connect, and any queries made using the connection pool will fail.
-@external(erlang, "gleam_pgo_ffi", "connect")
+@external(erlang, "pog_ffi", "connect")
 pub fn connect(a: Config) -> Connection
 
 /// Shut down a connection pool.
-@external(erlang, "gleam_pgo_ffi", "disconnect")
+@external(erlang, "pog_ffi", "disconnect")
 pub fn disconnect(a: Connection) -> Nil
 
 /// A value that can be sent to PostgreSQL as one of the arguments to a
 /// parameterised SQL query.
 pub type Value
 
-@external(erlang, "gleam_pgo_ffi", "null")
+@external(erlang, "pog_ffi", "null")
 pub fn null() -> Value
 
-@external(erlang, "gleam_pgo_ffi", "coerce")
+@external(erlang, "pog_ffi", "coerce")
 pub fn bool(a: Bool) -> Value
 
-@external(erlang, "gleam_pgo_ffi", "coerce")
+@external(erlang, "pog_ffi", "coerce")
 pub fn int(a: Int) -> Value
 
-@external(erlang, "gleam_pgo_ffi", "coerce")
+@external(erlang, "pog_ffi", "coerce")
 pub fn float(a: Float) -> Value
 
-@external(erlang, "gleam_pgo_ffi", "coerce")
+@external(erlang, "pog_ffi", "coerce")
 pub fn text(a: String) -> Value
 
-@external(erlang, "gleam_pgo_ffi", "coerce")
+@external(erlang, "pog_ffi", "coerce")
 pub fn bytea(a: BitArray) -> Value
 
-@external(erlang, "gleam_pgo_ffi", "coerce")
+@external(erlang, "pog_ffi", "coerce")
 pub fn array(a: List(a)) -> Value
 
 /// Coerce a timestamp represented as `#(#(year, month, day), #(hour, minute, second))` into a `Value`.
-@external(erlang, "gleam_pgo_ffi", "coerce")
+@external(erlang, "pog_ffi", "coerce")
 pub fn timestamp(a: #(#(Int, Int, Int), #(Int, Int, Int))) -> Value
 
 /// Coerce a date represented as `#(year, month, day)` into a `Value`.
-@external(erlang, "gleam_pgo_ffi", "coerce")
+@external(erlang, "pog_ffi", "coerce")
 pub fn date(a: #(Int, Int, Int)) -> Value
 
 pub type TransactionError {
@@ -187,7 +187,7 @@ pub type TransactionError {
 ///
 /// If the function returns an `Error` or panics then the transaction is rolled
 /// back.
-@external(erlang, "gleam_pgo_ffi", "transaction")
+@external(erlang, "pog_ffi", "transaction")
 pub fn transaction(
   pool: Connection,
   callback: fn(Connection) -> Result(t, String),
@@ -205,7 +205,7 @@ pub type Returned(t) {
   Returned(count: Int, rows: List(t))
 }
 
-@external(erlang, "gleam_pgo_ffi", "query")
+@external(erlang, "pog_ffi", "query")
 fn run_query(
   a: Connection,
   b: String,

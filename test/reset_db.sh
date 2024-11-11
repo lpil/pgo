@@ -6,13 +6,13 @@ echo
 echo Resetting database
 
 psql <<SQL
-SELECT 'CREATE DATABASE gleam_pgo_test'
+SELECT 'CREATE DATABASE gleam_pog_test'
 WHERE NOT EXISTS (
-  SELECT FROM pg_database WHERE datname = 'gleam_pgo_test'
+  SELECT FROM pg_database WHERE datname = 'gleam_pog_test'
 )\\gexec
 SQL
 
-psql -v "ON_ERROR_STOP=1" -d gleam_pgo_test <<SQL
+psql -v "ON_ERROR_STOP=1" -d gleam_pog_test <<SQL
 DROP TABLE IF EXISTS cats;
 CREATE TABLE cats (
   id SERIAL PRIMARY KEY,

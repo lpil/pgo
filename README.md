@@ -1,4 +1,4 @@
-# Gleam PGO
+# Pog
 
 A PostgreSQL database client for Gleam, based on [PGO][erlang-pgo].
 

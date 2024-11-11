@@ -1,10 +1,10 @@
--module(gleam_pgo_ffi).
+-module(pog_ffi).
 
 -export([query/3, connect/1, disconnect/1, coerce/1, null/0, transaction/2]).
 
--record(pgo_pool, {name, pid}).
+-record(pog_pool, {name, pid}).
 
--include_lib("gleam_pgo/include/gleam@pgo_Config.hrl").
+-include_lib("pog/include/pog_Config.hrl").
 -include_lib("pg_types/include/pg_types.hrl").
 
 null() ->
@@ -39,7 +39,7 @@ default_ssl_options(Host, Ssl) ->
 
 connect(Config) ->
     Id = integer_to_list(erlang:unique_integer([positive])),
-    PoolName = list_to_atom("gleam_pgo_pool_" ++ Id),
+    PoolName = list_to_atom("pog_pool_" ++ Id),
     #config{
         host = Host,
         port = Port,
@@ -81,28 +81,28 @@ connect(Config) ->
         none -> Options1
     end,
     {ok, Pid} = pgo_pool:start_link(PoolName, Options2),
-    #pgo_pool{name = PoolName, pid = Pid}.
+    #pog_pool{name = PoolName, pid = Pid}.
 
-disconnect(#pgo_pool{pid = Pid}) ->
+disconnect(#pog_pool{pid = Pid}) ->
     erlang:exit(Pid, normal),
     nil.
 
-transaction(#pgo_pool{name = Name} = Conn, Callback) ->
+transaction(#pog_pool{name = Name} = Conn, Callback) ->
     F = fun() ->
         case Callback(Conn) of
             {ok, T} -> {ok, T};
-            {error, Reason} -> error({gleam_pgo_rollback_transaction, Reason})
+            {error, Reason} -> error({pog_rollback_transaction, Reason})
         end
     end,
     try
         pgo:transaction(Name, F, #{})
     catch
-        error:{gleam_pgo_rollback_transaction, Reason} ->
+        error:{pog_rollback_transaction, Reason} ->
             {error, {transaction_rolled_back, Reason}}
     end.
 
 
-query(#pgo_pool{name = Name}, Sql, Arguments) ->
+query(#pog_pool{name = Name}, Sql, Arguments) ->
     case pgo:query(Sql, Arguments, #{pool => Name}) of
         #{rows := Rows, num_rows := NumRows} ->
             {ok, {NumRows, Rows}};
@@ -122,7 +122,7 @@ convert_error({pgsql_error, #{
 }}) ->
     {constraint_violated, Message, Constraint, Detail};
 convert_error({pgsql_error, #{code := Code, message := Message}}) ->
-    Constant = case gleam@pgo:error_code_name(Code) of
+    Constant = case pog:error_code_name(Code) of
         {ok, X} -> X;
         {error, nil} -> <<"unknown">>
     end,
