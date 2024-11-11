@@ -1,7 +1,6 @@
 import exception
 import gleam/dynamic.{type Decoder}
 import gleam/option.{None, Some}
-import gleam/string
 import gleeunit
 import gleeunit/should
 import pog
@@ -85,7 +84,7 @@ pub fn inserting_new_rows_test() {
   VALUES
     (DEFAULT, 'bill', true, ARRAY ['black'], now(), '2020-03-04'),
     (DEFAULT, 'felix', false, ARRAY ['grey'], now(), '2020-03-05')"
-  let assert Ok(returned) = pog.execute(sql, db, [], dynamic.dynamic)
+  let assert Ok(returned) = pog.query(sql) |> pog.execute(db)
 
   returned.count
   |> should.equal(2)
@@ -107,7 +106,9 @@ pub fn inserting_new_rows_and_returning_test() {
   RETURNING
     name"
   let assert Ok(returned) =
-    pog.execute(sql, db, [], dynamic.element(0, dynamic.string))
+    pog.query(sql)
+    |> pog.returning(dynamic.element(0, dynamic.string))
+    |> pog.execute(db)
 
   returned.count
   |> should.equal(2)
@@ -129,22 +130,22 @@ pub fn selecting_rows_test() {
       id"
 
   let assert Ok(pog.Returned(rows: [id], ..)) =
-    pog.execute(sql, db, [], dynamic.element(0, dynamic.int))
+    pog.query(sql)
+    |> pog.returning(dynamic.element(0, dynamic.int))
+    |> pog.execute(db)
 
   let assert Ok(returned) =
-    pog.execute(
-      "SELECT * FROM cats WHERE id = $1",
-      db,
-      [pog.int(id)],
-      dynamic.tuple6(
-        dynamic.int,
-        dynamic.string,
-        dynamic.bool,
-        dynamic.list(dynamic.string),
-        pog.decode_timestamp,
-        pog.decode_date,
-      ),
-    )
+    pog.query("SELECT * FROM cats WHERE id = $1")
+    |> pog.parameter(pog.int(id))
+    |> pog.returning(dynamic.tuple6(
+      dynamic.int,
+      dynamic.string,
+      dynamic.bool,
+      dynamic.list(dynamic.string),
+      pog.decode_timestamp,
+      pog.decode_date,
+    ))
+    |> pog.execute(db)
 
   returned.count
   |> should.equal(1)
@@ -165,7 +166,7 @@ pub fn invalid_sql_test() {
   let sql = "select       select"
 
   let assert Error(pog.PostgresqlError(code, name, message)) =
-    pog.execute(sql, db, [], dynamic.dynamic)
+    pog.query(sql) |> pog.execute(db)
 
   code
   |> should.equal("42601")
@@ -188,7 +189,7 @@ pub fn insert_constraint_error_test() {
       (900, 'felix', false, ARRAY ['black'], now(), '2020-03-05')"
 
   let assert Error(pog.ConstraintViolated(message, constraint, detail)) =
-    pog.execute(sql, db, [], dynamic.dynamic)
+    pog.query(sql) |> pog.execute(db)
 
   constraint
   |> should.equal("cats_pkey")
@@ -209,7 +210,7 @@ pub fn select_from_unknown_table_test() {
   let sql = "SELECT * FROM unknown"
 
   let assert Error(pog.PostgresqlError(code, name, message)) =
-    pog.execute(on: db, query: sql, with: [], expecting: dynamic.dynamic)
+    pog.query(sql) |> pog.execute(db)
 
   code
   |> should.equal("42P01")
@@ -230,7 +231,7 @@ pub fn insert_with_incorrect_type_test() {
       VALUES
         (true, true, true, true)"
   let assert Error(pog.PostgresqlError(code, name, message)) =
-    pog.execute(sql, db, [], dynamic.dynamic)
+    pog.query(sql) |> pog.execute(db)
 
   code
   |> should.equal("42804")
@@ -248,7 +249,9 @@ pub fn execute_with_wrong_number_of_arguments_test() {
   let db = start_default()
   let sql = "SELECT * FROM cats WHERE id = $1"
 
-  pog.execute(sql, db, [], dynamic.dynamic)
+  pog.query(sql)
+  |> pog.returning(dynamic.dynamic)
+  |> pog.execute(db)
   |> should.equal(Error(pog.UnexpectedArgumentCount(expected: 1, got: 0)))
 
   pog.disconnect(db)
@@ -261,24 +264,20 @@ fn assert_roundtrip(
   encoder: fn(a) -> pog.Value,
   decoder: Decoder(a),
 ) -> pog.Connection {
-  pog.execute(
-    string.append("select $1::", type_name),
-    db,
-    [encoder(value)],
-    dynamic.element(0, decoder),
-  )
+  pog.query("select $1::" <> type_name)
+  |> pog.parameter(encoder(value))
+  |> pog.returning(dynamic.element(0, decoder))
+  |> pog.execute(db)
   |> should.equal(Ok(pog.Returned(count: 1, rows: [value])))
   db
 }
 
 pub fn null_test() {
   let db = start_default()
-  pog.execute(
-    "select $1",
-    db,
-    [pog.null()],
-    dynamic.element(0, dynamic.optional(dynamic.int)),
-  )
+  pog.query("select $1")
+  |> pog.parameter(pog.null())
+  |> pog.returning(dynamic.element(0, dynamic.optional(dynamic.int)))
+  |> pog.execute(db)
   |> should.equal(Ok(pog.Returned(count: 1, rows: [None])))
 
   pog.disconnect(db)
@@ -407,7 +406,11 @@ pub fn nullable_test() {
 
 pub fn expected_argument_type_test() {
   let db = start_default()
-  pog.execute("select $1::int", db, [pog.float(1.2)], dynamic.int)
+
+  pog.query("select $1::int")
+  |> pog.returning(dynamic.element(0, dynamic.string))
+  |> pog.parameter(pog.float(1.2))
+  |> pog.execute(db)
   |> should.equal(Error(pog.UnexpectedArgumentType("int4", "1.2")))
 
   pog.disconnect(db)
@@ -415,7 +418,9 @@ pub fn expected_argument_type_test() {
 
 pub fn expected_return_type_test() {
   let db = start_default()
-  pog.execute("select 1", db, [], dynamic.element(0, dynamic.string))
+  pog.query("select 1")
+  |> pog.returning(dynamic.element(0, dynamic.string))
+  |> pog.execute(db)
   |> should.equal(
     Error(
       pog.UnexpectedResultType([
@@ -440,25 +445,25 @@ pub fn expected_maps_test() {
       id"
 
   let assert Ok(pog.Returned(rows: [id], ..)) =
-    pog.execute(sql, db, [], dynamic.field("id", dynamic.int))
+    pog.query(sql)
+    |> pog.returning(dynamic.field("id", dynamic.int))
+    |> pog.execute(db)
 
   let assert Ok(returned) =
-    pog.execute(
-      "SELECT * FROM cats WHERE id = $1",
-      db,
-      [pog.int(id)],
-      dynamic.decode6(
-        fn(id, name, is_cute, colors, last_petted_at, birthday) {
-          #(id, name, is_cute, colors, last_petted_at, birthday)
-        },
-        dynamic.field("id", dynamic.int),
-        dynamic.field("name", dynamic.string),
-        dynamic.field("is_cute", dynamic.bool),
-        dynamic.field("colors", dynamic.list(dynamic.string)),
-        dynamic.field("last_petted_at", pog.decode_timestamp),
-        dynamic.field("birthday", pog.decode_date),
-      ),
-    )
+    pog.query("SELECT * FROM cats WHERE id = $1")
+    |> pog.parameter(pog.int(id))
+    |> pog.returning(dynamic.decode6(
+      fn(id, name, is_cute, colors, last_petted_at, birthday) {
+        #(id, name, is_cute, colors, last_petted_at, birthday)
+      },
+      dynamic.field("id", dynamic.int),
+      dynamic.field("name", dynamic.string),
+      dynamic.field("is_cute", dynamic.bool),
+      dynamic.field("colors", dynamic.list(dynamic.string)),
+      dynamic.field("last_petted_at", pog.decode_timestamp),
+      dynamic.field("birthday", pog.decode_date),
+    ))
+    |> pog.execute(db)
 
   returned.count
   |> should.equal(1)
@@ -477,7 +482,7 @@ pub fn expected_maps_test() {
 pub fn transaction_commit_test() {
   let db = start_default()
   let id_decoder = dynamic.element(0, dynamic.int)
-  let assert Ok(_) = pog.execute("truncate table cats", db, [], Ok)
+  let assert Ok(_) = pog.query("truncate table cats") |> pog.execute(db)
 
   let insert = fn(db, name) {
     let sql = "
@@ -487,7 +492,9 @@ pub fn transaction_commit_test() {
     (DEFAULT, '" <> name <> "', true, ARRAY ['black'], now(), '2020-03-04')
   RETURNING id"
     let assert Ok(pog.Returned(rows: [id], ..)) =
-      pog.execute(sql, db, [], id_decoder)
+      pog.query(sql)
+      |> pog.returning(id_decoder)
+      |> pog.execute(db)
     id
   }
 
@@ -518,7 +525,9 @@ pub fn transaction_commit_test() {
     })
 
   let assert Ok(returned) =
-    pog.execute("select id from cats order by id", db, [], id_decoder)
+    pog.query("select id from cats order by id")
+    |> pog.returning(id_decoder)
+    |> pog.execute(db)
 
   let assert [got1, got2] = returned.rows
   let assert True = id1 == got1
