@@ -2,7 +2,7 @@
 ////
 //// Gleam wrapper around pgo library
 
-// TODO: add time and timestamp with zone once PGO supports them
+// TODO: add time and timestamp with zone once pgo supports them
 
 import gleam/dynamic.{type DecodeErrors, type Decoder, type Dynamic}
 import gleam/float
@@ -51,7 +51,7 @@ pub type Config {
     trace: Bool,
     /// (default: Ipv4) Which internet protocol to use for this connection
     ip_version: IpVersion,
-    /// (default: False) By default, PGO will return a n-tuple, in the order of the query.
+    /// (default: False) By default, pgo will return a n-tuple, in the order of the query.
     /// By setting `rows_as_map` to `True`, the result will be `Dict`.
     rows_as_map: Bool,
   )
@@ -155,7 +155,7 @@ pub fn ip_version(config: Config, ip_version: IpVersion) -> Config {
   Config(..config, ip_version:)
 }
 
-/// By default, PGO will return a n-tuple, in the order of the query.
+/// By default, pgo will return a n-tuple, in the order of the query.
 /// By setting `rows_as_map` to `True`, the result will be `Dict`.
 pub fn rows_as_map(config: Config, rows_as_map: Bool) -> Config {
   Config(..config, rows_as_map:)
