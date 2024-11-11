@@ -53,6 +53,110 @@ pub type Config {
   )
 }
 
+/// Database server hostname.
+///
+/// (default: 127.0.0.1)
+pub fn host(config: Config, host: String) -> Config {
+  Config(..config, host:)
+}
+
+/// Port the server is listening on.
+///
+/// (default: 5432)
+pub fn port(config: Config, port: Int) -> Config {
+  Config(..config, port:)
+}
+
+/// Name of database to use.
+pub fn database(config: Config, database: String) -> Config {
+  Config(..config, database:)
+}
+
+/// Username to connect to database as.
+pub fn user(config: Config, user: String) -> Config {
+  Config(..config, user:)
+}
+
+/// Password for the user.
+pub fn password(config: Config, password: Option(String)) -> Config {
+  Config(..config, password:)
+}
+
+/// Whether to use SSL or not.
+///
+/// (default: False)
+pub fn ssl(config: Config, ssl: Bool) -> Config {
+  Config(..config, ssl:)
+}
+
+/// Any Postgres connection parameter here, such as
+/// `"application_name: myappname"` and `"timezone: GMT"`
+pub fn connection_parameter(
+  config: Config,
+  name name: String,
+  value value: String,
+) -> Config {
+  Config(
+    ..config,
+    connection_parameters: [#(name, value), ..config.connection_parameters],
+  )
+}
+
+/// Number of connections to keep open with the database
+///
+/// default: 10
+pub fn pool_size(config: Config, pool_size: Int) -> Config {
+  Config(..config, pool_size:)
+}
+
+/// Checking out connections is handled through a queue. If it
+/// takes longer than queue_target to get out of the queue for longer than
+/// queue_interval then the queue_target will be doubled and checkouts will
+/// start to be dropped if that target is surpassed.
+///
+/// default: 50
+pub fn queue_target(config: Config, queue_target: Int) -> Config {
+  Config(..config, queue_target:)
+}
+
+/// Checking out connections is handled through a queue. If it
+/// takes longer than queue_target to get out of the queue for longer than
+/// queue_interval then the queue_target will be doubled and checkouts will
+/// start to be dropped if that target is surpassed.
+///
+/// default: 1000
+pub fn queue_interval(config: Config, queue_interval: Int) -> Config {
+  Config(..config, queue_interval:)
+}
+
+/// The database is pinged every idle_interval when the connection is idle.
+///
+/// default: 1000
+pub fn idle_interval(config: Config, idle_interval: Int) -> Config {
+  Config(..config, idle_interval:)
+}
+
+/// Trace pgo is instrumented with [OpenTelemetry][1] and
+/// when this option is true a span will be created (if sampled).
+///
+/// default: False
+///
+/// [1]: https://opentelemetry.io
+pub fn trace(config: Config, trace: Bool) -> Config {
+  Config(..config, trace:)
+}
+
+/// Which internet protocol to use for this connection
+pub fn ip_version(config: Config, ip_version: IpVersion) -> Config {
+  Config(..config, ip_version:)
+}
+
+/// By default, PGO will return a n-tuple, in the order of the query.
+/// By setting `rows_as_map` to `True`, the result will be `Dict`.
+pub fn rows_as_map(config: Config, rows_as_map: Bool) -> Config {
+  Config(..config, rows_as_map:)
+}
+
 /// The internet protocol version to use.
 pub type IpVersion {
   /// Internet Protocol version 4 (IPv4)
@@ -73,7 +177,7 @@ pub fn default_config() -> Config {
     password: None,
     ssl: False,
     connection_parameters: [],
-    pool_size: 1,
+    pool_size: 10,
     queue_target: 50,
     queue_interval: 1000,
     idle_interval: 1000,
