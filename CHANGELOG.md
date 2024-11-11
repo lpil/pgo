@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.0 - 2024-11-11
+
+- Renamed to `pog`.
+- Configuration and query API redesigned.
+
 ## v0.15.0 - Unreleased
 
 - Ensure `ssl` and `pgo` are running before using `gleam_pgo`.
