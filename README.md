@@ -109,3 +109,8 @@ them can exist in an Erlang VM instance, and hitting this limit will result in
 the VM crashing. Due to this limitation you should not dynamically open new
 connection pools, instead create the pools you need when your application starts
 and reuse them throughout the lifetime of your program.
+
+## History
+
+Previously this library was named `gleam_pgo`. This old name is deprecated and
+all future development and support will happen here.
